@@ -96,15 +96,17 @@ namespace GrpcRemoting
 			}
 
 			var delegateType = Type.GetType(remoteDelegateInfo.DelegateTypeName);
+            if (delegateType == null)
+                throw new Exception("Delegate type not found: " + remoteDelegateInfo.DelegateTypeName);
 
-			//if (false)//_delegateProxyCache.ContainsKey((delegateType, position)))
-			//{
-			//	mappedArgument = _delegateProxyCache[(delegateType, position)].ProxiedDelegate;
-			//	return true;
-			//}
+            //if (false)//_delegateProxyCache.ContainsKey((delegateType, position)))
+            //{
+            //	mappedArgument = _delegateProxyCache[(delegateType, position)].ProxiedDelegate;
+            //	return true;
+            //}
 
-			// Forge a delegate proxy and initiate remote delegate invocation, when it is invoked
-			var delegateProxy =
+            // Forge a delegate proxy and initiate remote delegate invocation, when it is invoked
+            var delegateProxy =
 				new DelegateProxy(delegateType, delegateArgs => 
 				{
 					var r = callDelegate(new DelegateCallMessage { Arguments = delegateArgs, Position = position, OneWay = !remoteDelegateInfo.HasResult });
@@ -143,7 +145,7 @@ namespace GrpcRemoting
 				var delegateResultMessage = new WireResponseMessage()
 				{
 					Data = delegateCallMsg,
-					ResponseType = enResponseType.Delegate
+					ResponseType = ResponseType.Delegate
 				};
 
 				// send respose to client and client will call the delegate via DelegateProxy
@@ -265,7 +267,7 @@ namespace GrpcRemoting
 			var methodResultMessage = new WireResponseMessage()
 			{
 				Data = resultMessage,
-				ResponseType = enResponseType.Result
+				ResponseType = ResponseType.Result
 			};
 
 			// async?

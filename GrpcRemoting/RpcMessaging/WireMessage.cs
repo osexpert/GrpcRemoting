@@ -15,14 +15,14 @@ namespace GrpcRemoting.RpcMessaging
 		public object Data { get; set; }
 	}
 
-	public enum enResponseType
+	public enum ResponseType
 	{
 		/// <summary>
-		/// 
+		/// Result
 		/// </summary>
 		Result,
 		/// <summary>
-		/// 
+		/// Delegate
 		/// </summary>
 		Delegate,
 	}
@@ -33,7 +33,7 @@ namespace GrpcRemoting.RpcMessaging
 		/// <summary>
 		/// Gets or sets the type of the message.
 		/// </summary>
-		public enResponseType ResponseType { get; set; }
+		public ResponseType ResponseType { get; set; }
 
 		/// <summary>
 		/// Gets or sets the raw data of the message content and its RSA signatures (only if message encryption is enabled).

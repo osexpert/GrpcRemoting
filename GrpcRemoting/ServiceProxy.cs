@@ -80,10 +80,10 @@ namespace GrpcRemoting
 
 			switch (callbackData.ResponseType)
 			{
-				case enResponseType.Result:
+				case ResponseType.Result:
 					return (MethodCallResultMessage)callbackData.Data;
 
-				case enResponseType.Delegate:
+				case ResponseType.Delegate:
 					{
 						var dele = (DelegateCallMessage)callbackData.Data;
 

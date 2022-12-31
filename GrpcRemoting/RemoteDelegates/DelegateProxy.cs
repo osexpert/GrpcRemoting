@@ -64,7 +64,10 @@ namespace GrpcRemoting.RemoteDelegates
 	    /// <exception cref="ArgumentException">Thrown if argument 'delegateType' is not a delegate</exception>
 	    private Delegate CreateProxiedDelegate(Type delegateType, MethodInfo interceptMethod, object interceptor)
 	    {
-		    if (interceptMethod == null)
+            if (delegateType == null)
+                throw new ArgumentNullException(nameof(delegateType));
+
+            if (interceptMethod == null)
 			    throw new ArgumentNullException(nameof(interceptMethod));
 		    
 		    if (interceptor == null)

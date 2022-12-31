@@ -28,6 +28,8 @@ namespace GrpcRemoting.RpcMessaging
             {
                 var parameter = callMessage.Parameters[i];
                 var parameterType = Type.GetType(parameter.ParameterTypeName);
+                if (parameterType == null)
+                    throw new Exception("Parameter type not found: " + parameter.ParameterTypeName);
                 parameterTypes[i] = parameterType;
 
                 parameterValues[i] =
