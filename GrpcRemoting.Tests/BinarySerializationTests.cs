@@ -1,3 +1,4 @@
+#if false
 using System;
 using GrpcRemoting.RpcMessaging;
 using GrpcRemoting.Serialization.Binary;
@@ -64,3 +65,4 @@ namespace GrpcRemoting.Tests
         }
     }
 }
+#endif

@@ -1,3 +1,4 @@
+#if false
 using System.Threading;
 using GrpcRemoting.Tests.Tools;
 using Xunit;
@@ -67,3 +68,4 @@ namespace GrpcRemoting.Tests
         }
     }
 }
+#endif

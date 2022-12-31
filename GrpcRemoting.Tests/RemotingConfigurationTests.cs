@@ -1,3 +1,4 @@
+#if false
 using System;
 using System.IO;
 using System.Reflection;
@@ -107,3 +108,4 @@ namespace GrpcRemoting.Tests
         }
     }
 }
+#endif
