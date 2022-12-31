@@ -1,6 +1,6 @@
 using System.Runtime.Serialization.Formatters;
 
-namespace CoreRemoting.Serialization.Binary
+namespace GrpcRemoting.Serialization.Binary
 {
     /// <summary>
     /// Describes binary serialization settings.

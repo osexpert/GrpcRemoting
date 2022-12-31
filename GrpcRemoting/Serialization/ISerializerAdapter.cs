@@ -1,6 +1,6 @@
 using System;
 
-namespace CoreRemoting.Serialization
+namespace GrpcRemoting.Serialization
 {
     /// <summary>
     /// Interface that serializer adapter components must implement.

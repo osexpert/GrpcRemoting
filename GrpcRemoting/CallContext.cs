@@ -1,8 +1,8 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace CoreRemoting
+namespace GrpcRemoting
 {
     /// <summary>
     /// Provides a way to set contextual data that flows with the call and 

@@ -5,7 +5,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-namespace CoreRemoting.Serialization.Binary
+namespace GrpcRemoting.Serialization.Binary
 {
     using System;
     using System.IO;

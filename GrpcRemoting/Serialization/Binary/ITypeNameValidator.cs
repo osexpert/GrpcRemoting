@@ -3,7 +3,7 @@
  * Many thanks to yallie for this great extensions to make BinaryFormatter a lot safer.
  */
 
-namespace CoreRemoting.Serialization.Binary
+namespace GrpcRemoting.Serialization.Binary
 {
     /// <summary>
     /// Interface for validating type names before loading types for deserialization.

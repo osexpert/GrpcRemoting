@@ -1,6 +1,6 @@
-using System;
+﻿using System;
 
-namespace CoreRemoting
+namespace GrpcRemoting
 {
     /// <summary>
     /// Describes a single call context entry.

@@ -5,7 +5,7 @@ using System.IO;
  * Many thanks to yallie for this great extensions to make BinaryFormatter a lot safer.
  */
 
-namespace CoreRemoting.Serialization.Binary
+namespace GrpcRemoting.Serialization.Binary
 {
     using System;
     using System.Runtime.Serialization.Formatters.Binary;
