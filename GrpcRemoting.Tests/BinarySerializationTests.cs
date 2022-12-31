@@ -1,10 +1,10 @@
 using System;
-using CoreRemoting.RpcMessaging;
-using CoreRemoting.Serialization.Binary;
-using CoreRemoting.Tests.Tools;
+using GrpcRemoting.RpcMessaging;
+using GrpcRemoting.Serialization.Binary;
+using GrpcRemoting.Tests.Tools;
 using Xunit;
 
-namespace CoreRemoting.Tests
+namespace GrpcRemoting.Tests
 {
     public class BinarySerializationTests
     {

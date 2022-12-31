@@ -2,10 +2,9 @@ using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using CoreRemoting.DependencyInjection;
 using Xunit;
 
-namespace CoreRemoting.Tests
+namespace GrpcRemoting.Tests
 {
     public class AsyncTests
     {

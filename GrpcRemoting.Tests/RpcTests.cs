@@ -1,9 +1,8 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
-using CoreRemoting.DependencyInjection;
-using CoreRemoting.Tests.ExternalTypes;
-using CoreRemoting.Tests.Tools;
+using GrpcRemoting.Tests.ExternalTypes;
+using GrpcRemoting.Tests.Tools;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -21,8 +21,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\CoreRemoting.Tests.ExternalTypes\CoreRemoting.Tests.ExternalTypes.csproj" />
-      <ProjectReference Include="..\CoreRemoting\CoreRemoting.csproj" />
+      <ProjectReference Include="..\GrpcRemoting.Tests.ExternalTypes\GrpcRemoting.Tests.ExternalTypes.csproj" />
+      <ProjectReference Include="..\GrpcRemoting\GrpcRemoting.csproj" />
     </ItemGroup>
 
     <ItemGroup>

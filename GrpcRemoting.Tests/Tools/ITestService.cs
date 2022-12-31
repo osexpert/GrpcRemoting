@@ -1,9 +1,9 @@
 using System;
-using CoreRemoting.Tests.ExternalTypes;
+using GrpcRemoting.Tests.ExternalTypes;
 
-namespace CoreRemoting.Tests.Tools
+namespace GrpcRemoting.Tests.Tools
 {
-    [ReturnAsProxy]
+//    [ReturnAsProxy]
     public interface ITestService
     {
         event Action ServiceEvent;
@@ -14,7 +14,7 @@ namespace CoreRemoting.Tests.Tools
 
         void FireServiceEvent();
 
-        [OneWay]
+//        [OneWay]
         void OneWayMethod();
 
         void TestExternalTypeParameter(DataClass data);

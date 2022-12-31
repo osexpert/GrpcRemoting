@@ -1,6 +1,6 @@
-namespace CoreRemoting.Tests.Tools
+namespace GrpcRemoting.Tests.Tools
 {
-    using CoreRemoting;
+    using GrpcRemoting;
     
     public class FactoryService : IFactoryService
     {

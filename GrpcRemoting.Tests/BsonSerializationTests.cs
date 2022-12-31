@@ -1,11 +1,11 @@
 using System;
-using CoreRemoting.RpcMessaging;
-using CoreRemoting.Serialization.Bson;
-using CoreRemoting.Tests.Tools;
+using GrpcRemoting.RpcMessaging;
+using GrpcRemoting.Serialization.Bson;
+using GrpcRemoting.Tests.Tools;
 using Newtonsoft.Json;
 using Xunit;
 
-namespace CoreRemoting.Tests
+namespace GrpcRemoting.Tests
 {
     public class BsonSerializationTests
     {

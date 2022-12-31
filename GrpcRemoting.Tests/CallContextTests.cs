@@ -1,9 +1,8 @@
 using System.Threading;
-using CoreRemoting.DependencyInjection;
-using CoreRemoting.Tests.Tools;
+using GrpcRemoting.Tests.Tools;
 using Xunit;
 
-namespace CoreRemoting.Tests
+namespace GrpcRemoting.Tests
 {
     public class CallContextTests
     {

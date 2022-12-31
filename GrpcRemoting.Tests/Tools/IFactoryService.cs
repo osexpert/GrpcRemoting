@@ -1,4 +1,4 @@
-namespace CoreRemoting.Tests.Tools
+namespace GrpcRemoting.Tests.Tools
 {
     public interface IFactoryService
     {

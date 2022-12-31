@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace CoreRemoting.Tests.ExternalTypes
+namespace GrpcRemoting.Tests.ExternalTypes
 {
     [DataContract]
     public class DataClass

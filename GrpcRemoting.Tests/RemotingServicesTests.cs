@@ -1,10 +1,9 @@
 using System;
 using System.Threading;
-using CoreRemoting.ClassicRemotingApi;
-using CoreRemoting.Tests.Tools;
+using GrpcRemoting.Tests.Tools;
 using Xunit;
 
-namespace CoreRemoting.Tests
+namespace GrpcRemoting.Tests
 {
     public class RemotingServicesTests
     {

@@ -1,15 +1,11 @@
 using System;
 using System.IO;
 using System.Reflection;
-using CoreRemoting.Authentication;
-using CoreRemoting.Channels.Websocket;
-using CoreRemoting.ClassicRemotingApi;
-using CoreRemoting.DependencyInjection;
-using CoreRemoting.Serialization.Binary;
-using CoreRemoting.Tests.Tools;
+using GrpcRemoting.Serialization.Binary;
+using GrpcRemoting.Tests.Tools;
 using Xunit;
 
-namespace CoreRemoting.Tests
+namespace GrpcRemoting.Tests
 {
     public class RemotingConfigurationTests
     {

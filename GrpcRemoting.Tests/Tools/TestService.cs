@@ -1,7 +1,7 @@
 using System;
-using CoreRemoting.Tests.ExternalTypes;
+using GrpcRemoting.Tests.ExternalTypes;
 
-namespace CoreRemoting.Tests.Tools
+namespace GrpcRemoting.Tests.Tools
 {
     public class TestService : ITestService
     {
