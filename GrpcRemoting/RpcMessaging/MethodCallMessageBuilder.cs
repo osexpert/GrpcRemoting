@@ -153,7 +153,7 @@ namespace GrpcRemoting.RpcMessaging
 
 				var isArgNull = arg == null;
 
-				// FIXME: why is every argument serialized individually???
+				// FIXME: why was every argument serialized individually???
 				/*
 				var serializedArgValue =
 					serializer.Serialize(
