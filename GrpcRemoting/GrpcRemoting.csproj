@@ -1,57 +1,36 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <LangVersion>default</LangVersion>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <LangVersion>9</LangVersion>
         <Title>CoreRemoting</Title>
-        <Authors>Hagen Siegel</Authors>
-        <Description>Easy to use Remoting library for .NET Core and .NET Framework</Description>
-        <Copyright>2022 Hagen Siegel</Copyright>
-        <PackageTags>Remoting RPC Network</PackageTags>
-        <Company>Hagen Siegel</Company>
-        <AssemblyVersion>1.1.14</AssemblyVersion>
-        <TargetFramework>netstandard2.0</TargetFramework>
-        <PackageProjectUrl>https://github.com/theRainbird/CoreRemoting</PackageProjectUrl>
+        <AssemblyVersion>0.0.1</AssemblyVersion>
+        <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+        <PackageProjectUrl>https://github.com/osexpert/GrpcRemoting</PackageProjectUrl>
         <PackageLicenseUrl></PackageLicenseUrl>
-        <RepositoryUrl>https://github.com/theRainbird/CoreRemoting.git</RepositoryUrl>
+        <RepositoryUrl>https://github.com/osexpert/CoreRemoting.git</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <PackageVersion>1.1.14</PackageVersion>
-        <PackageReleaseNotes>- Added [ReturnAsProxy]
-- Fixed support for out parameters</PackageReleaseNotes>
+        <PackageVersion>0.0.1</PackageVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <DocumentationFile>bin\Debug\CoreRemoting.xml</DocumentationFile>
+      <DocumentationFile>bin\Debug\GrpcRemoting.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <DocumentationFile>bin\Release\CoreRemoting.xml</DocumentationFile>
+      <DocumentationFile>bin\Release\GrpcRemoting.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Castle.Windsor" Version="5.1.2" />
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
-      <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-      <PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.2" />
-      <PackageReference Include="Serialize.Linq" Version="2.0.0" />
+      <PackageReference Include="Castle.Core" Version="5.1.0" />
+      <PackageReference Include="Grpc.Core.Api" Version="2.49.0" />
+      
+      <PackageReference Include="Open.ChannelExtensions" Version="6.2.2"  Condition="'$(TargetFramework)' == 'NETSTANDARD2.0'" />
       <PackageReference Include="stakx.DynamicProxy.AsyncInterceptor" Version="0.1.0" />
-      <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.1" />
-      <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-      <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
-      <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
-      <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
-      <PackageReference Include="System.Security.Cryptography.Cng" Version="5.0.0" />
-      <PackageReference Include="System.Security.Cryptography.OpenSsl" Version="5.0.0" />
-      <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
-      <PackageReference Include="websocketsharp.core" Version="1.0.0" />
+	<PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
+	  <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
+      <PackageReference Include="System.Threading.Channels" Version="6.0.0" />
     </ItemGroup>
     
-    <ItemGroup>
-      <Protobuf Include="**/*.proto" />
-    </ItemGroup>
-    
-    <ItemGroup>
-      <Folder Include="LinqExpressions" />
-    </ItemGroup>
+
 
 </Project>

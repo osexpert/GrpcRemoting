@@ -1,34 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30907.101
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32825.248
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreRemoting", "CoreRemoting\CoreRemoting.csproj", "{2E256F93-746B-4417-97E5-5565C684B233}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreRemoting.Authentication.LinuxPamAuthProvider", "CoreRemoting.Authentication.LinuxPamAuthProvider\CoreRemoting.Authentication.LinuxPamAuthProvider.csproj", "{1579A6FD-DEEF-4E34-A6DD-32AAB9CA629B}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreRemoting.Tests", "CoreRemoting.Tests\CoreRemoting.Tests.csproj", "{BDDC0B08-A4F0-423D-927D-823EDCB192C5}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelloWorld.Client", "Examples\HelloWorld\HelloWorld.Client\HelloWorld.Client.csproj", "{D0F539B2-D16E-4CA5-A371-FE59B9D836CC}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelloWorld.Shared", "Examples\HelloWorld\HelloWorld.Shared\HelloWorld.Shared.csproj", "{3D722B5E-00DD-4FFC-8057-5C3C16FEBA16}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelloWorld.Server", "Examples\HelloWorld\HelloWorld.Server\HelloWorld.Server.csproj", "{7E1B5031-0265-4BEF-B4FE-382E5CAEBA8B}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{A60590C3-9800-4945-AC2B-F9770370F8FE}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "HelloWorld", "HelloWorld", "{530CD64A-0D82-445A-8360-30E27FD7403C}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7A4ECBC5-B6A3-450D-8804-F21AEDD066A0}"
-	ProjectSection(SolutionItems) = preProject
-		.gitignore = .gitignore
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreRemoting.Authentication.WindowsAuthProvider", "CoreRemoting.Authentication.WindowsAuthProvider\CoreRemoting.Authentication.WindowsAuthProvider.csproj", "{34E0ADAE-B7FF-4811-BBCD-60473E63A3A5}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreRemoting.Authentication.GenericOsAuthProvider", "CoreRemoting.Authentication.GenericOsAuthProvider\CoreRemoting.Authentication.GenericOsAuthProvider.csproj", "{BC94361A-CA63-4D28-9FD0-BEF492952B6E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreRemoting.Tests.ExternalTypes", "CoreRemoting.Tests.ExternalTypes\CoreRemoting.Tests.ExternalTypes.csproj", "{6A63A1C8-FF93-4E23-BB19-7071BF635174}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrpcRemoting", "GrpcRemoting\GrpcRemoting.csproj", "{5ABBA252-0A16-446D-AF6A-B4FCC6743C36}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,53 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2E256F93-746B-4417-97E5-5565C684B233}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2E256F93-746B-4417-97E5-5565C684B233}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2E256F93-746B-4417-97E5-5565C684B233}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2E256F93-746B-4417-97E5-5565C684B233}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1579A6FD-DEEF-4E34-A6DD-32AAB9CA629B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1579A6FD-DEEF-4E34-A6DD-32AAB9CA629B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1579A6FD-DEEF-4E34-A6DD-32AAB9CA629B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1579A6FD-DEEF-4E34-A6DD-32AAB9CA629B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BDDC0B08-A4F0-423D-927D-823EDCB192C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BDDC0B08-A4F0-423D-927D-823EDCB192C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BDDC0B08-A4F0-423D-927D-823EDCB192C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BDDC0B08-A4F0-423D-927D-823EDCB192C5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D0F539B2-D16E-4CA5-A371-FE59B9D836CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D0F539B2-D16E-4CA5-A371-FE59B9D836CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D0F539B2-D16E-4CA5-A371-FE59B9D836CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D0F539B2-D16E-4CA5-A371-FE59B9D836CC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3D722B5E-00DD-4FFC-8057-5C3C16FEBA16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3D722B5E-00DD-4FFC-8057-5C3C16FEBA16}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3D722B5E-00DD-4FFC-8057-5C3C16FEBA16}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3D722B5E-00DD-4FFC-8057-5C3C16FEBA16}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7E1B5031-0265-4BEF-B4FE-382E5CAEBA8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7E1B5031-0265-4BEF-B4FE-382E5CAEBA8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7E1B5031-0265-4BEF-B4FE-382E5CAEBA8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7E1B5031-0265-4BEF-B4FE-382E5CAEBA8B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{34E0ADAE-B7FF-4811-BBCD-60473E63A3A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{34E0ADAE-B7FF-4811-BBCD-60473E63A3A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{34E0ADAE-B7FF-4811-BBCD-60473E63A3A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{34E0ADAE-B7FF-4811-BBCD-60473E63A3A5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BC94361A-CA63-4D28-9FD0-BEF492952B6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BC94361A-CA63-4D28-9FD0-BEF492952B6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BC94361A-CA63-4D28-9FD0-BEF492952B6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BC94361A-CA63-4D28-9FD0-BEF492952B6E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6A63A1C8-FF93-4E23-BB19-7071BF635174}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6A63A1C8-FF93-4E23-BB19-7071BF635174}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6A63A1C8-FF93-4E23-BB19-7071BF635174}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6A63A1C8-FF93-4E23-BB19-7071BF635174}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5ABBA252-0A16-446D-AF6A-B4FCC6743C36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5ABBA252-0A16-446D-AF6A-B4FCC6743C36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5ABBA252-0A16-446D-AF6A-B4FCC6743C36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5ABBA252-0A16-446D-AF6A-B4FCC6743C36}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{D0F539B2-D16E-4CA5-A371-FE59B9D836CC} = {530CD64A-0D82-445A-8360-30E27FD7403C}
-		{3D722B5E-00DD-4FFC-8057-5C3C16FEBA16} = {530CD64A-0D82-445A-8360-30E27FD7403C}
-		{7E1B5031-0265-4BEF-B4FE-382E5CAEBA8B} = {530CD64A-0D82-445A-8360-30E27FD7403C}
-		{530CD64A-0D82-445A-8360-30E27FD7403C} = {A60590C3-9800-4945-AC2B-F9770370F8FE}
-	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {56E821C2-FAE1-4C5F-8043-1A141A74F1FE}
+		SolutionGuid = {3A054D58-17BA-4DCC-80E1-8E04282C61BC}
 	EndGlobalSection
 EndGlobal

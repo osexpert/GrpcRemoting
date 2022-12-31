@@ -1,256 +1,334 @@
-using System;
+﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using CoreRemoting.Authentication;
-using CoreRemoting.Channels;
-using CoreRemoting.Channels.Websocket;
-using CoreRemoting.DependencyInjection;
-using CoreRemoting.RpcMessaging;
-using CoreRemoting.RemoteDelegates;
-using CoreRemoting.Serialization;
-using CoreRemoting.Serialization.Bson;
-using ServiceLifetime = CoreRemoting.DependencyInjection.ServiceLifetime;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+using Grpc.Core;
+using Grpc.Core.Utils;
+using GrpcRemoting.RemoteDelegates;
+using GrpcRemoting.RpcMessaging;
+using GrpcRemoting.Serialization;
+using GrpcRemoting.Serialization.Binary;
+using System.Xml.Linq;
 
-namespace CoreRemoting
+namespace GrpcRemoting
 {
-    /// <summary>
-    /// CoreRemoting server implementation.
-    /// </summary>
-    public sealed class RemotingServer : IRemotingServer
-    {
-        private readonly IDependencyInjectionContainer _container;
-        private readonly ServerConfig _config;
-        private readonly string _uniqueServerInstanceName;
-        
-        // ReSharper disable once InconsistentNaming
-        private static readonly ConcurrentDictionary<string, IRemotingServer> _serverInstances = 
-            new ConcurrentDictionary<string, IRemotingServer>();
+	public interface IGrpcRemotingServerHandler
+	{
+		object CreateInstance(Type serviceType);
+		// FIXME: make option to choose formatter per method?
+	}
 
-        private static WeakReference<IRemotingServer> _defaultRemotingServerRef;
-        
-        /// <summary>
-        /// Creates a new instance of the RemotingServer class.
-        /// </summary>
-        /// <param name="config">Configuration settings to be used (Default configuration is used, if left null)</param>
-        public RemotingServer(ServerConfig config = null)
-        {
-            _config = config ?? new ServerConfig();
+	public class GrpcRemotingServer
+	{
 
-            _uniqueServerInstanceName = 
-                string.IsNullOrWhiteSpace(_config.UniqueServerInstanceName) 
-                    ? Guid.NewGuid().ToString() 
-                    : _config.UniqueServerInstanceName;
-            
-            _serverInstances.AddOrUpdate(
-                key: _config.UniqueServerInstanceName,
-                addValueFactory: uniqueInstanceName => this,
-                updateValueFactory: (uniqueInstanceName, oldServer) =>
-                {
-                    oldServer?.Dispose();
-                    return this;
-                });
-            
-            SessionRepository = 
-                _config.SessionRepository ?? 
-                    new SessionRepository( 
-                        keySize: _config.KeySize,
-                        inactiveSessionSweepInterval: _config.InactiveSessionSweepInterval,
-                        maximumSessionInactivityTime: _config.MaximumSessionInactivityTime);
-            
-            _container = _config.DependencyInjectionContainer ?? new CastleWindsorDependencyInjectionContainer();
-            Serializer = _config.Serializer ?? new BsonSerializerAdapter();
-            MethodCallMessageBuilder = new MethodCallMessageBuilder();
-            MessageEncryptionManager = new MessageEncryptionManager();
-            
-            _container.RegisterService<IDelegateProxyFactory, DelegateProxyFactory>(
-                lifetime: ServiceLifetime.Singleton);
-            
-            _config.RegisterServicesAction?.Invoke(_container);
+		MethodCallMessageBuilder pMessBuilder = new();
 
-            Channel = _config.Channel ?? new WebsocketServerChannel();
-            
-            Channel.Init(this);
-            
-            if (_config.IsDefault)
-                RemotingServer.DefaultRemotingServer ??= this;
-        }
-        
-        /// <summary>
-        /// Event: Fires before an RPC call is invoked.
-        /// </summary>
-        public event EventHandler<ServerRpcContext> BeforeCall;
-        
-        /// <summary>
-        /// Event: Fires after an RPC call is invoked.
-        /// </summary>
-        public event EventHandler<ServerRpcContext> AfterCall;
+		//private ConcurrentDictionary<(Type, int), DelegateProxy> _delegateProxyCache = new();
+		static ConcurrentDictionary<string, Type> hsServices = new();
 
-        /// <summary>
-        /// Event: Fires if an error occurs.
-        /// </summary>
-        public event EventHandler<Exception> Error;
-        
-        /// <summary>
-        /// Gets the dependency injection container that is used a service registry.
-        /// </summary>
-        public IDependencyInjectionContainer ServiceRegistry => _container;
+        IGrpcRemotingServerHandler pHand;
 
-        /// <summary>
-        /// Gets the unique name of this server instance.
-        /// </summary>
-        public string UniqueServerInstanceName => _uniqueServerInstanceName;
+        public GrpcRemotingServer(IGrpcRemotingServerHandler hand)
+		{
+			pHand = hand;
 
-        /// <summary>
-        /// Gets the configuration settings.
-        /// </summary>
-        public ServerConfig Config => _config;
-        
-        /// <summary>
-        /// Gets the configured serializer.
-        /// </summary>
-        public ISerializerAdapter Serializer { get; }
-
-        /// <summary>
-        /// Gets the component for easy building of method call messages.
-        /// </summary>
-        public MethodCallMessageBuilder MethodCallMessageBuilder { get; }
-
-        /// <summary>
-        /// Gets the component for encryption and decryption of messages.
-        /// </summary>
-        public IMessageEncryptionManager MessageEncryptionManager { get; }
-        
-        /// <summary>
-        /// Gets the session repository to perform session management tasks.
-        /// </summary>
-        public ISessionRepository SessionRepository { get; }
-
-        /// <summary>
-        /// Gets the channel used to do the raw network transport.
-        /// </summary>
-        [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
-        public IServerChannel Channel { get; private set; }
-
-        /// <summary>
-        /// Fires the OnBeforeCall event.
-        /// </summary>
-        /// <param name="serverRpcContext">Server side RPC call context</param>
-        internal void OnBeforeCall(ServerRpcContext serverRpcContext)
-        {
-            BeforeCall?.Invoke(this, serverRpcContext);
         }
 
-        /// <summary>
-        /// Fires the OnAfterCall event.
-        /// </summary>
-        /// <param name="serverRpcContext">Server side RPC call context</param>
-        internal void OnAfterCall(ServerRpcContext serverRpcContext)
-        {
-            AfterCall?.Invoke(this, serverRpcContext);
+		private object GetService(string serviceName)
+		{
+			if (!hsServices.TryGetValue(serviceName, out var serviceType))
+				throw new Exception("Service not registered: " + serviceName);
+
+			return pHand.CreateInstance(serviceType);
         }
 
-        /// <summary>
-        /// Fires the OnError event.
-        /// </summary>
-        /// <param name="ex">Exception that describes the occurred error</param>
-        internal void OnError(Exception ex)
-        {
-            Error?.Invoke(this, ex);
+		private Type GetServiceType(string serviceName)
+		{
+			if (hsServices.TryGetValue(serviceName, out var serviceType))
+				return serviceType;
+
+			throw new Exception("Service not registered: " + serviceName);
+		}
+
+		/// <summary>
+		/// Maps non serializable arguments into a serializable form.
+		/// </summary>
+		/// <param name="arguments">Array of parameter values</param>
+		/// <param name="argumentTypes">Array of parameter types</param>
+		/// <returns>Array of arguments (includes mapped ones)</returns>
+		private object[] MapArguments(object[] arguments, Type[] argumentTypes, Func<DelegateCallMessage, object> callDelegate)
+		{
+			object[] mappedArguments = new object[arguments.Length];
+
+			for (int i = 0; i < arguments.Length; i++)
+			{
+				var argument = arguments[i];
+				var type = argumentTypes[i];
+
+				if (MapDelegateArgument(argument, i, out var mappedArgument, callDelegate))
+					mappedArguments[i] = mappedArgument;
+				else
+					mappedArguments[i] = argument;
+			}
+
+			return mappedArguments;
+		}
+
+
+		/// <summary>
+		/// Maps a delegate argument into a delegate proxy.
+		/// </summary>
+		/// <param name="argument">argument value</param>
+		/// <param name="mappedArgument">Out: argument value where delegate value is mapped into delegate proxy</param>
+		/// <returns>True if mapping applied, otherwise false</returns>
+		/// <exception cref="ArgumentNullException">Thrown if no session is provided</exception>
+		private bool MapDelegateArgument(object argument, int position, out object mappedArgument, Func<DelegateCallMessage, object> callDelegate)
+		{
+			if (!(argument is RemoteDelegateInfo remoteDelegateInfo))
+			{
+				mappedArgument = argument;
+				return false;
+			}
+
+			var delegateType = Type.GetType(remoteDelegateInfo.DelegateTypeName);
+
+			//if (false)//_delegateProxyCache.ContainsKey((delegateType, position)))
+			//{
+			//	mappedArgument = _delegateProxyCache[(delegateType, position)].ProxiedDelegate;
+			//	return true;
+			//}
+
+			// Forge a delegate proxy and initiate remote delegate invocation, when it is invoked
+			var delegateProxy =
+				new DelegateProxy(delegateType, delegateArgs => 
+				{
+					var r = callDelegate(new DelegateCallMessage { Arguments = delegateArgs, Position = position, OneWay = !remoteDelegateInfo.HasResult });
+					return r;
+				});
+
+			// TODO: do we need cache?
+//			_delegateProxyCache.TryAdd((delegateType, position), delegateProxy);
+
+			mappedArgument = delegateProxy.ProxiedDelegate;
+			return true;
+		}
+
+		public static void RegisterService(Type type, string ifaceName)
+		{
+			if (!hsServices.TryAdd(ifaceName, type))
+				throw new Exception("Service already added: " + ifaceName);
+		}
+
+		public static void RegisterService(Type type, Type iface) => RegisterService(type, iface.Name);
+
+        private async Task RpcCall(ISerializerAdapter serializer, byte[] request, Func<Task<byte[]>> req, Func<byte[], Task> reponse)
+		{
+            var wireMessage = serializer.Deserialize<WireCallMessage>(request);
+
+			var callMessage = (MethodCallMessage)wireMessage.Data;
+
+			CallContext.RestoreFromSnapshot(callMessage.CallContextSnapshot);
+
+			callMessage.UnwrapParametersFromDeserializedMethodCallMessage(
+				out var parameterValues,
+				out var parameterTypes);
+
+			parameterValues = MapArguments(parameterValues, parameterTypes, /*async ??*/ delegateCallMsg =>
+			{
+				var delegateResultMessage = new WireResponseMessage()
+				{
+					Data = delegateCallMsg,
+					ResponseType = enResponseType.Delegate
+				};
+
+				// send respose to client and client will call the delegate via DelegateProxy
+				// TODO: should we have a different kind of OneWay too, where we dont even wait for the response to be sent???
+				// These may seem to be 2 varianst of OneWay: 1 where we send and wait until sent, but do not care about result\exceptions.
+				// 2: we send and do not even wait for the sending to complete. (currently not implemented)
+				reponse(serializer.Serialize(delegateResultMessage)).GetAwaiter().GetResult();
+
+				if (delegateCallMsg.OneWay)
+				{
+					// fire and forget. no result, not even exception
+					return null;
+				}
+				else
+				{
+					// we want result or exception
+					byte[] data = req().GetAwaiter().GetResult();
+					var msg = serializer.Deserialize<DelegateCallResultMessage>(data);
+					if (msg.Exception != null)
+						throw msg.Exception.Capture();
+					else
+						return msg.Result;
+				}
+			});
+
+			var serviceInterfaceType = GetServiceType(callMessage.ServiceName);
+			MethodInfo method;
+
+			if (callMessage.GenericArgumentTypeNames != null && callMessage.GenericArgumentTypeNames.Length > 0)
+			{
+				var methods = serviceInterfaceType.GetMethods();
+
+				method =
+					methods.SingleOrDefault(m =>
+						m.IsGenericMethod &&
+						m.Name.Equals(callMessage.MethodName, StringComparison.Ordinal));
+
+				if (method != null)
+				{
+					Type[] genericArguments =
+						callMessage.GenericArgumentTypeNames
+							.Select(typeName => Type.GetType(typeName))
+							.ToArray();
+
+					method = method.MakeGenericMethod(genericArguments);
+				}
+			}
+			else
+			{
+				method =
+					serviceInterfaceType.GetMethod(
+						name: callMessage.MethodName,
+						types: parameterTypes);
+			}
+
+			if (method == null)
+				throw new MissingMethodException(
+					className: callMessage.ServiceName,
+					methodName: callMessage.MethodName);
+
+			var oneWay = false;// method.GetCustomAttribute<OneWayAttribute>() != null;
+
+			object result = null;
+
+			Exception exception = null;
+
+			try
+			{
+				var service = GetService(callMessage.ServiceName);
+				result = method.Invoke(service, parameterValues);
+
+				var returnType = method.ReturnType;
+
+				if (result != null && typeof(Task).IsAssignableFrom(returnType))// && returnType.IsGenericType) WHY GENERIC???
+				{
+					var resultTask = (Task)result;
+					await resultTask.ConfigureAwait(false);
+
+					if (returnType.IsGenericType)
+						result = returnType.GetProperty("Result")?.GetValue(resultTask);
+					else
+						result = null;
+				}
+			}
+			catch (Exception ex)
+			{
+				Exception ex2 = ex;
+				if (ex2 is TargetInvocationException tie)
+					ex2 = tie.InnerException;
+
+				exception = ex2.GetType().IsSerializable ? ex2 : new RemoteInvocationException(ex2.Message);
+
+				if (oneWay)
+					return;// Task.CompletedTask;
+			}
+
+			MethodCallResultMessage resultMessage = null;
+
+			if (exception == null)
+			{
+				if (!oneWay)
+				{
+					resultMessage =
+						pMessBuilder.BuildMethodCallResultMessage(
+								serializer: serializer,
+								method: method,
+								args: parameterValues,
+								returnValue: result);
+				}
+
+				if (oneWay)
+					return;// Task.CompletedTask;
+			}
+			else
+			{
+				resultMessage = new MethodCallResultMessage { Exception = exception };
+			}
+
+			var methodResultMessage = new WireResponseMessage()
+			{
+				Data = resultMessage,
+				ResponseType = enResponseType.Result
+			};
+
+			// async?
+			await reponse(serializer.Serialize(methodResultMessage)).ConfigureAwait(false);
+
+			return;// Task.CompletedTask;
+		}
+
+        static ISerializerAdapter sBinaryFormatter = new BinarySerializerAdapter();
+
+        public Task RpcCallBinaryFormatter(IAsyncStreamReader<byte[]> requestStream, IServerStreamWriter<byte[]> responseStream, ServerCallContext context)
+		{
+			return RpcCall(sBinaryFormatter, requestStream, responseStream, context);
         }
-        
-        /// <summary>
-        /// Starts listening for client requests.
-        /// </summary>
-        public void Start()
-        {
-            Channel.StartListening();
-        }
 
-        /// <summary>
-        /// Stops listening for client requests and close all open client connections.
-        /// </summary>
-        public void Stop()
-        {
-            Channel.StopListening();
-        }
 
-        /// <summary>
-        /// Authenticates the specified credentials and returns whether the authentication was successful or not.
-        /// </summary>
-        /// <param name="credentials">Credentials to be used for authentication</param>
-        /// <param name="authenticatedIdentity">Authenticated identity (null when authentication fails)</param>
-        /// <returns>True when authentication was successful, otherwise false</returns>
-        public bool Authenticate(Credential[] credentials, out RemotingIdentity authenticatedIdentity)
-        {
-            if (_config.AuthenticationProvider == null)
-            {
-                authenticatedIdentity = null;
-                return false;
-            }
+        public async Task RpcCall(ISerializerAdapter serializer, IAsyncStreamReader<byte[]> requestStream, IServerStreamWriter<byte[]> responseStream, ServerCallContext context)
+		{
+			try
+			{
+				var responseStreamWrapped = new GrpcRemoting.StreamResponseQueue<byte[]>(responseStream);
 
-            return _config.AuthenticationProvider.Authenticate(credentials, out authenticatedIdentity);
-        }
+				bool gotNext = await requestStream.MoveNext().ConfigureAwait(false);
+				if (!gotNext)
+					throw new Exception("no method call request data");
 
-        /// <summary>
-        /// Frees managed resources.
-        /// </summary>
-        public void Dispose()
-        {
-            if (RemotingServer.DefaultRemotingServer == this)
-                RemotingServer.DefaultRemotingServer = null;
-            
-            _serverInstances.TryRemove(_config.UniqueServerInstanceName, out _);
-            
-            if (Channel != null)
-            {
-                Channel.Dispose();
-                Channel = null;
-            }
-        }
-        
-        #region Managing server instances
+				await this.RpcCall(serializer, requestStream.Current, async () =>
+				{
+					var gotNext = await requestStream.MoveNext().ConfigureAwait(false);
+					if (!gotNext)
+						throw new Exception("no delegate request data");
+					return requestStream.Current;
+				},
+				resp => responseStreamWrapped.WriteAsync(resp).AsTask()).ConfigureAwait(false);
 
-        /// <summary>
-        /// Gets a list of active server instances.
-        /// </summary>
-        public static IEnumerable<IRemotingServer> ActiveServerInstances => _serverInstances.Values;
+				await responseStreamWrapped.CompleteAsync().ConfigureAwait(false);
+			}
+			catch (Exception e)
+			{
+				context.Status = new Status(StatusCode.Unknown, e.ToString());
+			}
+		}
 
-        /// <summary>
-        /// Gets a active server instance by its unique instance name.
-        /// </summary>
-        /// <param name="uniqueServerInstanceName">Unique server instance name</param>
-        /// <returns>Active CoreRemoting server</returns>
-        public static IRemotingServer GetActiveServerInstance(string uniqueServerInstanceName)
-        {
-            _serverInstances.TryGetValue(uniqueServerInstanceName, out var server);
-            return server;
-        }
 
-        /// <summary>
-        /// Gets or sets the default CoreRemoting server.
-        /// </summary>
-        [SuppressMessage("ReSharper", "ArrangeAccessorOwnerBody")]
-        public static IRemotingServer DefaultRemotingServer
-        {
-            get
-            {
-                if (_defaultRemotingServerRef == null)
-                    return null;
+	}
 
-                _defaultRemotingServerRef.TryGetTarget(out var defaultServer);
+	public class Descriptors
+	{
+		public static Method<byte[], byte[]> RpcCallBinaryFormatter = GetRpcCall("BinaryFormatter");
 
-                return defaultServer;
-            }
-            internal set
-            {
-                _defaultRemotingServerRef = 
-                    value == null 
-                        ? null 
-                        : new WeakReference<IRemotingServer>(value);
-            }
-        }
-        
-        #endregion
+		public static Method<byte[], byte[]> GetRpcCall(string name)
+		{
+			return new Method<byte[], byte[]>(
+				type: MethodType.DuplexStreaming,
+				serviceName: "GrpcRemoting",
+				name: name,
+				requestMarshaller: Marshallers.Create(
+					serializer: bytes => bytes,
+					deserializer: bytes => bytes),
+				responseMarshaller: Marshallers.Create(
+					serializer: bytes => bytes,
+					deserializer: bytes => bytes));
+		}
     }
+
 }

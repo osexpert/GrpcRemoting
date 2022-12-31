@@ -1,3 +1,4 @@
+#if false
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
@@ -662,3 +663,4 @@ namespace CoreRemoting
         #endregion
     }
 }
+#endif

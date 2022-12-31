@@ -1,3 +1,4 @@
+#if false
 using System;
 using System.Collections.Generic;
 using CoreRemoting.Channels;
@@ -45,3 +46,4 @@ namespace CoreRemoting
         void RemoveSession(Guid sessionId);
     }
 }
+#endif
