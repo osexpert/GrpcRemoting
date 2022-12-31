@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace GrpcRemoting.Messaging
+namespace GrpcRemoting.RpcMessaging
 {
     /// <summary>
     /// Serializable message that describes a parameter of an remote method call. 

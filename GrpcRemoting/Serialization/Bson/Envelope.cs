@@ -1,3 +1,4 @@
+#if false
 using System;
 using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
@@ -67,3 +68,4 @@ namespace CoreRemoting.Serialization.Bson
         }
     }
 }
+#endif

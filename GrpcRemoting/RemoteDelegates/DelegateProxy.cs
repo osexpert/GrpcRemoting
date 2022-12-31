@@ -1,14 +1,14 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace CoreRemoting.RemoteDelegates
+namespace GrpcRemoting.RemoteDelegates
 {
-    /// <summary>
-    /// Proxy for intercepting calls on a specified delegate type. 
-    /// </summary>
-    public sealed class DelegateProxy : IDelegateProxy
+	/// <summary>
+	/// Proxy for intercepting calls on a specified delegate type. 
+	/// </summary>
+	public sealed class DelegateProxy //: IDelegateProxy
     {
 	    private Func<object[], object> _callInterceptionHandler;
 

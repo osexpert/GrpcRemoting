@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Runtime.Serialization;
 
-namespace CoreRemoting.RpcMessaging
+namespace GrpcRemoting.RpcMessaging
 {
     /// <summary>
     /// Serializable message that describes the result of a remote method call.
@@ -16,6 +16,12 @@ namespace CoreRemoting.RpcMessaging
         [DataMember]
         public object ReturnValue { get; set; }
         
+        /// <summary>
+        /// Exception
+        /// </summary>
+        [DataMember]
+        public Exception Exception { get; set; }
+
         /// <summary>
         /// Gets or sets whether the return value is null or not.
         /// </summary>

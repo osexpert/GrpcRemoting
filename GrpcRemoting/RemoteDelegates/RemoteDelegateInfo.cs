@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Runtime.Serialization;
 
-namespace CoreRemoting.RemoteDelegates
+namespace GrpcRemoting.RemoteDelegates
 {
     /// <summary>
     /// Describes a remote delegate.
@@ -11,30 +11,31 @@ namespace CoreRemoting.RemoteDelegates
     public class RemoteDelegateInfo
     {
         [DataMember]
-        private Guid _handlerKey;
-        
-        [DataMember]
         private string _delegateTypeName;
+
+        [DataMember]
+        private bool _hasResult;
+
 
         /// <summary>
         /// Creates a new instance of the RemoteDelegateInfo class.
         /// </summary>
-        /// <param name="handlerKey">Unique handler key of the client delegate</param>
         /// <param name="delegateTypeName">Type name of the client delegate</param>
-        public RemoteDelegateInfo(Guid handlerKey, string delegateTypeName)
+        /// <param name="hasResult">Has result</param>
+		public RemoteDelegateInfo(string delegateTypeName, bool hasResult)
         {
-            _handlerKey = handlerKey;
             _delegateTypeName = delegateTypeName;
+			_hasResult = hasResult;
         }
         
-        /// <summary>
-        /// Gets the handler key of the client delegate.
-        /// </summary>
-        public Guid HandlerKey => _handlerKey;
-
         /// <summary>
         /// Gets the type name of the client delegate.
         /// </summary>
         public string DelegateTypeName => _delegateTypeName;
+
+        /// <summary>
+        /// HasResult
+        /// </summary>
+        public bool HasResult => _hasResult;
     }
 }

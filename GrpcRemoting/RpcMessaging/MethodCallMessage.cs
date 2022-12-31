@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Runtime.Serialization;
 
-namespace CoreRemoting.RpcMessaging
+namespace GrpcRemoting.RpcMessaging
 {
     /// <summary>
     /// Describes a method call as serializable message.

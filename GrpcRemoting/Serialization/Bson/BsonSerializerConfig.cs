@@ -1,3 +1,4 @@
+#if false
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
@@ -28,3 +29,4 @@ namespace CoreRemoting.Serialization.Bson
         public List<JsonConverter> JsonConverters { get; }
     }
 }
+#endif

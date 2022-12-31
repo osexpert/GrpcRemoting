@@ -1,3 +1,4 @@
+#if false
 using System;
 using System.IO;
 using Newtonsoft.Json;
@@ -107,3 +108,4 @@ namespace CoreRemoting.Serialization.Bson
         public bool EnvelopeNeededForParameterSerialization => true;
     }
 }
+#endif
