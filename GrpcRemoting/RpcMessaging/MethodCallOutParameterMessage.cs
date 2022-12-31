@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Runtime.Serialization;
 
-namespace CoreRemoting.RpcMessaging
+namespace GrpcRemoting.Messaging
 {
     /// <summary>
     /// Serializable message that describes an out parameter.

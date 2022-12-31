@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Runtime.Serialization;
 
-namespace CoreRemoting
+namespace GrpcRemoting
 {
     /// <summary>
     /// Exception to be thrown, if remote method invocation has been failed.
