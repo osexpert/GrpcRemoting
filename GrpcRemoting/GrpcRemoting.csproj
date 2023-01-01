@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <LangVersion>9</LangVersion>
-        <Title>CoreRemoting</Title>
+        <Title>GrpcRemoting</Title>
         <AssemblyVersion>0.0.1</AssemblyVersion>
         <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
         <PackageProjectUrl>https://github.com/osexpert/GrpcRemoting</PackageProjectUrl>
@@ -26,7 +26,7 @@
       
       <PackageReference Include="Open.ChannelExtensions" Version="6.2.2"  Condition="'$(TargetFramework)' == 'NETSTANDARD2.0'" />
       <PackageReference Include="stakx.DynamicProxy.AsyncInterceptor" Version="0.1.0" />
-	<PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
+	  <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
 	  <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
       <PackageReference Include="System.Threading.Channels" Version="6.0.0" />
     </ItemGroup>

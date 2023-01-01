@@ -221,12 +221,13 @@ namespace GrpcRemoting
   
     }
 
-    public static class ExceptionExtensions
+    internal static class ExceptionExtensions
     {
-		public static Exception Capture(this Exception ex)
+		internal static void Capture(Exception e)
 		{
-			ExceptionDispatchInfo.Capture(ex);
-			return ex;
+			FieldInfo remoteStackTraceString = typeof(Exception).GetField("_remoteStackTraceString", BindingFlags.Instance | BindingFlags.NonPublic);
+			remoteStackTraceString.SetValue(e, e.StackTrace + System.Environment.NewLine);
 		}
+
     }
 }

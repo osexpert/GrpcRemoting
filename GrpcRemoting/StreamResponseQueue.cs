@@ -77,9 +77,9 @@ namespace GrpcRemoting
             var _ = await _channel.Reader.ReadAllAsync(cancellationToken, msg => new ValueTask(_stream.WriteAsync(msg))).ConfigureAwait(false);
 #elif NETSTANDARD2_1
 
-			await foreach (var message in _channel.Reader.ReadAllAsync(cancellationToken))
+			await foreach (var message in _channel.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
 			{
-				await _stream.WriteAsync(message);
+				await _stream.WriteAsync(message).ConfigureAwait(false);
 			}
 
 #else
