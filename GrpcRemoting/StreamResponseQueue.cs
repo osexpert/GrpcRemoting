@@ -71,20 +71,14 @@ namespace GrpcRemoting
 
 #if NETSTANDARD2_0
             // Using Open.ChannelExtensions since ReadAllAsync not available in netstandard 2.0
-
             // ValueTask confusion here...
-
             var _ = await _channel.Reader.ReadAllAsync(cancellationToken, msg => new ValueTask(_stream.WriteAsync(msg))).ConfigureAwait(false);
-#elif NETSTANDARD2_1
+#else
 
 			await foreach (var message in _channel.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
 			{
 				await _stream.WriteAsync(message).ConfigureAwait(false);
 			}
-
-#else
-
-#error Not good
 
 #endif
         }

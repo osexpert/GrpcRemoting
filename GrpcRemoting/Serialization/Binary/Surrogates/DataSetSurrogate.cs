@@ -7,23 +7,31 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace GrpcRemoting.Serialization.Binary
 {
-    using System.Data;
+	using System;
+	using System.Data;
     using System.IO;
     using System.Reflection;
     using System.Runtime.Serialization;
     using System.Runtime.Serialization.Formatters.Binary;
     using System.Security.Permissions;
+	using System.Xml.Linq;
 
-    /// <summary>
-    /// Deserialization surrogate for the DataSet class.
-    /// </summary>
-    internal class DataSetSurrogate : ISerializationSurrogate
+	/// <summary>
+	/// Deserialization surrogate for the DataSet class.
+	/// </summary>
+    internal class DataSetSurrogate : ISerializationSurrogateEx
     {
         private static ConstructorInfo Constructor { get; } = typeof(DataSet).GetConstructor(
             BindingFlags.Instance | BindingFlags.NonPublic,
             null,
             new[] { typeof(SerializationInfo), typeof(StreamingContext) },
             null);
+
+        public bool Handles(Type type, StreamingContext context)
+        {
+            bool handles = type == typeof(DataSet);
+            return handles;
+        }
 
         /// <inheritdoc cref="ISerializationSurrogate" />
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
@@ -34,9 +42,9 @@ namespace GrpcRemoting.Serialization.Binary
             ds.GetObjectData(info, context);
         }
 
-        /// <inheritdoc cref="ISerializationSurrogate" />
+		/// <inheritdoc cref="ISerializationSurrogate" />
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
-        public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
+		public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
         {
             Validate(info, context);
 

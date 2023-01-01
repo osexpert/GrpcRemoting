@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using GrpcRemoting.Serialization;
+using GrpcRemoting.Serialization.Bson;
 
 namespace GrpcRemoting.RpcMessaging
 {
@@ -114,7 +115,6 @@ namespace GrpcRemoting.RpcMessaging
 		/// Builds a new method call result message.
 		/// </summary>
 		/// <param name="serializer">Serializer adapter used to serialize argument values</param>
-		/// <param name="uniqueCallKey">Unique key to correlate RPC call</param>
 		/// <param name="method">Method information of the called method</param>
 		/// <param name="args">Arguments</param>
 		/// <param name="returnValue">Returned return value</param>
@@ -180,29 +180,5 @@ namespace GrpcRemoting.RpcMessaging
 			return message;
 		}
 	
-	}
-
-	public class Envelope
-	{
-		public Envelope(object arg)
-		{
-			throw new NotImplementedException();
-		}
-
-		public object Value
-		{
-			get
-			{
-				throw new NotImplementedException();
-			}
-		}
-
-		public TypeCode Type 
-		{ 
-			get
-			{
-				throw new NotImplementedException();
-			}
-		}
 	}
 }

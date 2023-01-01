@@ -1,3 +1,4 @@
+#if false
 /*
  * Code is copied from https://github.com/zyanfx/SafeDeserializationHelpers
  * Many thanks to yallie for this great extensions to make BinaryFormatter a lot safer.
@@ -61,3 +62,4 @@ namespace GrpcRemoting.Serialization.Binary
         }
     }
 }
+#endif

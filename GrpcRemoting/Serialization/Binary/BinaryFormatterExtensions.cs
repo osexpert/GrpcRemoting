@@ -52,7 +52,18 @@ namespace GrpcRemoting.Serialization.Binary
         public static byte[] SerializeByteArray(this BinaryFormatter formatter, object objectToSerialize)
         {
             using var stream = new MemoryStream();
+
+#if NETSTANDARD2_0
+
             formatter.Serialize(stream, objectToSerialize);
+
+#else
+            // for net6 need to use "Safe" formatter to enable the surrogates for types no longer serializable
+
+            var safeBinaryFormatter = formatter.Safe();
+			safeBinaryFormatter.Serialize(stream, objectToSerialize);
+#endif
+
             return stream.ToArray();
         }
         

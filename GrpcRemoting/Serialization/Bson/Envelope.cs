@@ -1,10 +1,34 @@
-#if false
 using System;
 using System.Diagnostics.CodeAnalysis;
-using Newtonsoft.Json;
+//using Newtonsoft.Json;
 
-namespace CoreRemoting.Serialization.Bson
+namespace GrpcRemoting.Serialization.Bson
 {
+    public class Envelope
+    {
+        public Envelope(object arg)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object Value
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public TypeCode Type
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+    }
+
+#if false
     /// <summary>
     /// Wraps values and preserve their types for serialization.
     /// </summary>
@@ -67,5 +91,5 @@ namespace CoreRemoting.Serialization.Bson
             }
         }
     }
-}
 #endif
+}

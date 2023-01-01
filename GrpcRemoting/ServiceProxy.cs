@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Castle.DynamicProxy;
 using GrpcRemoting.RemoteDelegates;
 using GrpcRemoting.RpcMessaging;
+using GrpcRemoting.Serialization.Bson;
 using stakx.DynamicProxy;
 
 namespace GrpcRemoting
@@ -223,10 +224,12 @@ namespace GrpcRemoting
 
     internal static class ExceptionExtensions
     {
-		internal static void Capture(Exception e)
+		internal static Exception Capture(this Exception e)
 		{
 			FieldInfo remoteStackTraceString = typeof(Exception).GetField("_remoteStackTraceString", BindingFlags.Instance | BindingFlags.NonPublic);
 			remoteStackTraceString.SetValue(e, e.StackTrace + System.Environment.NewLine);
+
+			return e;
 		}
 
     }

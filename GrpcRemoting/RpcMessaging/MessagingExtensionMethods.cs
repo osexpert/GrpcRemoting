@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-//using GrpcRemoting.Serialization.Bson;
+using GrpcRemoting.Serialization.Bson;
 
 namespace GrpcRemoting.RpcMessaging
 {

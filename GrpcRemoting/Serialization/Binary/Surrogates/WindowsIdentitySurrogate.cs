@@ -8,7 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace GrpcRemoting.Serialization.Binary
 {
     using System;
-    using System.IO;
+	using System.IO;
     using System.Reflection;
     using System.Runtime.Serialization;
     using System.Runtime.Serialization.Formatters.Binary;
@@ -18,13 +18,19 @@ namespace GrpcRemoting.Serialization.Binary
     /// <summary>
     /// Deserialization surrogate for the WindowsIdentity class.
     /// </summary>
-    internal class WindowsIdentitySurrogate : ISerializationSurrogate
-    {
+    internal class WindowsIdentitySurrogate : ISerializationSurrogateEx
+	{
         private static ConstructorInfo Constructor { get; } = typeof(WindowsIdentity).GetConstructor(
             BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
             null,
             new[] { typeof(SerializationInfo), typeof(StreamingContext) },
             null);
+
+        public bool Handles(Type type, StreamingContext context)
+        {
+            bool handles = type == typeof(WindowsIdentity);
+            return handles;
+        }
 
         /// <inheritdoc cref="ISerializationSurrogate" />
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
@@ -35,9 +41,9 @@ namespace GrpcRemoting.Serialization.Binary
             ds.GetObjectData(info, context);
         }
 
-        /// <inheritdoc cref="ISerializationSurrogate" />
+		/// <inheritdoc cref="ISerializationSurrogate" />
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
-        public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
+		public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
         {
             Validate(info, context);
 
