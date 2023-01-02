@@ -1,162 +1,61 @@
-# CoreRemoting
-RPC library (.NET Standard 2.0) with classic .NET Remoting flavour
+# GrpcRemoting
 
-NuGet package: https://www.nuget.org/packages/CoreRemoting/<br>
-Documentation: https://github.com/theRainbird/CoreRemoting/wiki
+GrpcRemoting is based on CoreRemoting  
+https://github.com/theRainbird/CoreRemoting  
 
-### What is it for?
-- To help migrate applications that use .NET Remoting to .NET Core / .NET 5 / .NET 6.
-- To provide easy-to-use RPC functionality
-- To support events and delegates in a distributed application
-- To run on Linux, Windows and Mac
+GrpcRemoting is (just like CoreRemoting) a way to migrate from .NET Remoting.  
 
-### What is it NOT for?
-- To create REST-APIs for Javascript clients
-- To create SOAP Webservices
-- To use with other platforms than .NET
-- To create server applications that needs to run on several cluster nodes
+Some limitations:  
+Method that return IEnumerable and yield (crashes)  
+Method that return IAsyncEnumerable and yield (crashes)  
+Async Func's, eg. an argument like Task Message(Func<string, Task<string>> message) (crashes)  
 
-## Facts & features
-- Creates proxy objects for remote services at runtime (uses Castle.DynamicProxy under the hood)
-- Services can have `SingleCall` or `Singeton` lifetime
-- Uses websockets for TCP duplex network communication by default (based on webshocket-sharp)
-- Custom transport channels can be plugged in (Just implement `IServerChannel` and `IClientChannel`)
-- Used Bson serialization by default (via Json.NET)
-- Also supports classic BinaryFormatter for best possible DataSet / DataTable support
-- BinaryFormatter is hardened against known deserialization attack patterns
-- Custom serializers can be plugged in (Just implement `ISerializerAdapter`)
-- Support for custom authentication (Just implement `IAuthenticationProvider`)
-- Pluggable authentication provider to authenticate Linux user on server with PAM is available
-- Pluggable authentication provider to authenticate Windows user on server is available
-- Message encryption with RSA key exchange and AES (No SSL, no X509 certificates needed, works also on Linux)
-- Supports .NET Remoting style `CallContext` (also on .NET Core / .NET 5) to implicitly transfer objects on RPC calls / threads
-- Supports Microsoft Dependency Injection (Just call `AddCoreRemotingServer` or `AddCoreRemotingClient` on your `IServiceCollection`)
-- Supports also Castle Windsor Container to provide Dependecy Injection
-- Built-in session management
-- Automatic sweeping of inactive sessions
-- Keep session alive feature
-- Can be used in Blazor Server projects to communicate to a central application server
-- Supports Linq Expression parameters
-- Supports remote invocation of async methods (async / await)
+CoreRemoting use websockets while GrpcRemoting is a rewrite (sort of) to use Grpc instead.  
+GrpcRemoting only support BinaryFormatter, while CoreRemoting also supported BSON.  
+Idea in the future is to support MessagePack or MemoryPack in addition.
+Idea is to make it possible to specify formatter on a per method basis, so slowly can migrate away from BinaryFormatter.  
+GrpcRemoting does not use .proto files but simply interfaces. Look at the examples for info, there is no documentation.  
 
-## Hello world example 
-Let's create a simple multi user chat server as hello world application.
+Other Rpc framework of interest:
 
-### Shared contract
-To be able to call a remote service, the client needs to know an interface implemented by the service.
-This interfaces should be placed in a shared assembly (Just like it is common with .NET remoting)
+StreamJsonRpc  
+https://github.com/microsoft/vs-streamjsonrpc  
 
-```csharp
-namespace HelloWorld.Shared
-{
-    public interface ISayHelloService
-    {
-        event Action<string, string> MessageReceived;
-        
-        void Say(string name, string message);
-    }
-}
-```
-### Server
-The server side application provides services to clients.
+ServiceModel.Grpc   
+https://max-ieremenko.github.io/ServiceModel.Grpc/  
+https://github.com/max-ieremenko/ServiceModel.Grpc  
 
-```csharp
-using System;
-using CoreRemoting;
-using CoreRemoting.DependencyInjection;
-using HelloWorld.Shared;
+protobuf-net.Grpc  
+https://github.com/protobuf-net/protobuf-net.Grpc  
 
-namespace HelloWorld.Server
-{
-    public class SayHelloService : ISayHelloService
-    {
-        // Event to notify clients when users post new chat messages
-        public event Action<string, string> MessageReceived;
-        
-        // Call via RPC to say something in the chat 
-        public void Say(string name, string message)
-        {
-            MessageReceived?.Invoke(name, message);
-        }
-    }
+SignalR.Strong  
+https://github.com/mehmetakbulut/SignalR.Strong  
 
-    public static class HelloWorldServer
-    {
-        static void Main(string[] args)
-        {
-            using var server = new RemotingServer(new ServerConfig()
-            {
-                HostName = "localhost",
-                NetworkPort = 9090,
-                RegisterServicesAction = container =>
-                {
-                    // Make SayHelloSevice class available for RPC calls from clients
-                    container.RegisterService<ISayHelloService, SayHelloService>(ServiceLifetime.Singleton);
-                }
-            });
-            
-            server.Start();
-            
-            Console.WriteLine("Server is running.");
-            Console.ReadLine();
-        }
-    }
-}
-```
+The examples:
 
-### Client
-The client consumes remote services hosted on the server.
+Client and Server in .NET Framework 4.8 using Grpc.Core native.
 
-```csharp
-using System;
-using CoreRemoting;
-using HelloWorld.Shared;
+Client and Server in .NET 6.0 using Grpc.Net managed.
 
-namespace HelloWorld.Client
-{
-    public static class HelloWorldClient
-    {
-        static void Main(string[] args)
-        {
-            using var client = new RemotingClient(new ClientConfig()
-            {
-                ServerHostName = "localhost",
-                ServerPort = 9090
-            });
-            
-            client.Connect();
+BinaryFormatter does not work well between .NET Framework and .NET bcause types are different,
+eg. string in .NET is "System.String,System.Private.CoreLib" while in .NET Framework "System.String,mscorlib"
 
-            // Create a proxy of the remote service, which behaves almost like a regular local object
-            var proxy = client.CreateProxy<ISayHelloService>();
-            
-            // Receive chat messages send by other remote users by event
-            proxy.MessageReceived += (senderName, message) => 
-                Console.WriteLine($"\n  {senderName} says: {message}\n");
-            
-            Console.WriteLine("What's your name?");
-            var name = Console.ReadLine();
+There exists hacks (links may not be relevant):
+https://programmingflow.com/2020/02/18/could-not-load-system-private-corelib.html  
+https://stackoverflow.com/questions/50190568/net-standard-4-7-1-could-not-load-system-private-corelib-during-serialization/56184385#56184385  
 
-            Console.WriteLine("\nEntered chat. Type 'quit' to leave.");
+You will need to add some hacks yourself if using BinaryFormatter across .NET Framework and .NET
 
-            bool quit = false;
+There should be possible to add more formatters. I hope to add for MessagePack or MemoryPack in the future.
 
-            while (!quit)
-            {
-                var text = Console.ReadLine();
+Performance:  
+The file copy test:
+.NET 4.8 server\client:  
+File sent to server and written by server: 18 seconds (why so slow?)  
+File read from server and written by client: 11 seconds  
 
-                if (text != null && text.Equals("quit", StringComparison.InvariantCultureIgnoreCase))
-                    quit = true;
-                else
-                {
-                    // Post a new chat message
-                    proxy.Say(name, text);
-                }
-            }
-        }
-    }
-}
-```
-Source code of this example is also available in the repository at https://github.com/theRainbird/CoreRemoting/tree/master/Examples/HelloWorld.
+.NET 6.0 server\client:  
+File sent to server and written by server: 31 seconds (oh noes...)  
+File read from server and written by client: 13 seconds  
 
-To test the hello world solution, start the server (HelloWorld.Server) and then multiple clients (HelloWorld.Client).
-Have fun.
+There is something fishy here:-)

@@ -24,12 +24,12 @@ namespace GrpcRemoting
     public class RemotingClient
 	{
         public IGrpcRemotingClientHandler pHand;
-        CallInvoker pInvoker;
+        CallInvoker _callInvoker;
 
-        public RemotingClient(CallInvoker invoker, IGrpcRemotingClientHandler hand)
+        public RemotingClient(CallInvoker callInvoker, IGrpcRemotingClientHandler hand)
 		{
 			pHand = hand;
-            pInvoker = invoker;
+            _callInvoker = callInvoker;
         }
 
         private static readonly Castle.DynamicProxy.ProxyGenerator ProxyGenerator = new Castle.DynamicProxy.ProxyGenerator();
@@ -37,7 +37,7 @@ namespace GrpcRemoting
         public T CreateServiceProxy<T>()
         {
             var serviceProxyType = typeof(ServiceProxy<>).MakeGenericType(typeof(T));
-            var serviceProxy = Activator.CreateInstance(serviceProxyType, this /* GrpcClient */);
+            var serviceProxy = Activator.CreateInstance(serviceProxyType, this /* RemotingClient */);
 
             var proxy = ProxyGenerator.CreateInterfaceProxyWithoutTarget(
                 interfaceToProxy: typeof(T),
@@ -49,11 +49,11 @@ namespace GrpcRemoting
         internal void CallbackToSetCallContext(MethodInfo mi) => pHand.BeforeBuildMethodCallMessage(mi);
 
 		public MethodCallMessageBuilder MethodCallMessageBuilder = new();
-		public ISerializerAdapter pSerializer = new BinarySerializerAdapter();
+		public ISerializerAdapter Serializer = new BinarySerializerAdapter();
 
         internal async Task InvokeAsync(byte[] req, Func<byte[], Func<byte[], Task>, Task> reponse)
         {
-            using (var call = pInvoker.AsyncDuplexStreamingCall(GrpcRemoting.Descriptors.RpcCallBinaryFormatter, null, new CallOptions { }))
+            using (var call = _callInvoker.AsyncDuplexStreamingCall(GrpcRemoting.Descriptors.RpcCallBinaryFormatter, null, new CallOptions { }))
             {
                 await call.RequestStream.WriteAsync(req).ConfigureAwait(false);
                 var responseCompleted = call.ResponseStream.ForEachAsync(b => reponse(b, d => call.RequestStream.WriteAsync(d)));
@@ -63,7 +63,7 @@ namespace GrpcRemoting
 
         internal void Invoke(byte[] req, Func<byte[], Func<byte[], Task>, Task> reponse)
         {
-            using (var call = pInvoker.AsyncDuplexStreamingCall(GrpcRemoting.Descriptors.RpcCallBinaryFormatter, null, new CallOptions { }))
+            using (var call = _callInvoker.AsyncDuplexStreamingCall(GrpcRemoting.Descriptors.RpcCallBinaryFormatter, null, new CallOptions { }))
             {
                 call.RequestStream.WriteAsync(req).GetAwaiter().GetResult();
                 var responseCompleted = call.ResponseStream.ForEachAsync(b => reponse(b, d => call.RequestStream.WriteAsync(d)));

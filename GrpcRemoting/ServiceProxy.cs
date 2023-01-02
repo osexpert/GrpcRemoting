@@ -33,14 +33,14 @@ namespace GrpcRemoting
 			_client.CallbackToSetCallContext(targetMethod);
 
 			var callMessage = _client.MethodCallMessageBuilder.BuildMethodCallMessage(
-				serializer: _client.pSerializer, 
+				serializer: _client.Serializer, 
 				remoteServiceName: _serviceName, 
 				targetMethod: targetMethod, 
 				args: arguments);
 
 			var wireCallMsg = new WireCallMessage() { Data = callMessage };
 
-			var bytes = _client.pSerializer.Serialize(wireCallMsg);
+			var bytes = _client.Serializer.Serialize(wireCallMsg);
 
 			MethodCallResultMessage resultMessage = null;
 			
@@ -75,7 +75,7 @@ namespace GrpcRemoting
 
 		private async Task<MethodCallResultMessage> HandleResponseAsync(byte[] callback, Func<byte[], Task> res, object[] args)
 		{
-			var callbackData = _client.pSerializer.Deserialize<WireResponseMessage>(callback);
+			var callbackData = _client.Serializer.Deserialize<WireResponseMessage>(callback);
 
 			switch (callbackData.ResponseType)
 			{
@@ -115,7 +115,7 @@ namespace GrpcRemoting
 						else
 							msg = new DelegateCallResultMessage() { Result = result };
 
-						var data = _client.pSerializer.Serialize(msg);
+						var data = _client.Serializer.Serialize(msg);
 						await res(data).ConfigureAwait(false);
 					}
 					break;
@@ -136,14 +136,14 @@ namespace GrpcRemoting
             _client.CallbackToSetCallContext(targetMethod);
 
             var callMessage = _client.MethodCallMessageBuilder.BuildMethodCallMessage(
-				serializer: _client.pSerializer, 
+				serializer: _client.Serializer, 
 				remoteServiceName: _serviceName, 
 				targetMethod: targetMethod, 
 				args: arguments);
 
 			var wireCallMsg = new WireCallMessage() { Data = callMessage };
 
-			var bytes = _client.pSerializer.Serialize(wireCallMsg);
+			var bytes = _client.Serializer.Serialize(wireCallMsg);
 
 			MethodCallResultMessage resultMessage = null;
 

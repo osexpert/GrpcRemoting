@@ -290,7 +290,7 @@ namespace GrpcRemoting
 			return;// Task.CompletedTask;
 		}
 
-        static ISerializerAdapter sBinaryFormatter = new BinarySerializerAdapter();
+        static ISerializerAdapter _binaryFormatter = new BinarySerializerAdapter();
 
         /// <summary>
 		/// 
@@ -301,7 +301,7 @@ namespace GrpcRemoting
 		/// <returns></returns>
 		public Task RpcCallBinaryFormatter(IAsyncStreamReader<byte[]> requestStream, IServerStreamWriter<byte[]> responseStream, ServerCallContext context)
 		{
-			return RpcCall(sBinaryFormatter, requestStream, responseStream, context);
+			return RpcCall(_binaryFormatter, requestStream, responseStream, context);
         }
 
 
