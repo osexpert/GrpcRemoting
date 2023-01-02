@@ -25,9 +25,9 @@ namespace ServerNet48
 
         void Go()
         {
-            GrpcRemotingServer.RegisterService(typeof(TestService), typeof(ITestService));
+            RemotingServer.RegisterService(typeof(TestService), typeof(ITestService));
 
-            var remServer = new GrpcRemotingServer(this);
+            var remServer = new RemotingServer(this);
 
             var options = new List<ChannelOption>();
             options.Add(new ChannelOption(ChannelOptions.MaxReceiveMessageLength, int.MaxValue));

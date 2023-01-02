@@ -24,7 +24,7 @@ namespace ClientNet48
         public void Go()
         {
             var channel = new Channel("localhost", 5000, ChannelCredentials.Insecure);
-            var c = new GrpcRemotingClient(channel.CreateCallInvoker(), this);
+            var c = new RemotingClient(channel.CreateCallInvoker(), this);
             var testServ = c.CreateServiceProxy<ITestService>();
 
             var cs = new ClientTest();

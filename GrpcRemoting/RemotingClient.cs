@@ -21,12 +21,12 @@ namespace GrpcRemoting
         // TODO: choose formatter per method??
     }
 
-    public class GrpcRemotingClient
+    public class RemotingClient
 	{
         public IGrpcRemotingClientHandler pHand;
         CallInvoker pInvoker;
 
-        public GrpcRemotingClient(CallInvoker invoker, IGrpcRemotingClientHandler hand)
+        public RemotingClient(CallInvoker invoker, IGrpcRemotingClientHandler hand)
 		{
 			pHand = hand;
             pInvoker = invoker;
@@ -36,7 +36,7 @@ namespace GrpcRemoting
 
         public T CreateServiceProxy<T>()
         {
-            var serviceProxyType = typeof(GrpcRemotingClientProxy<>).MakeGenericType(typeof(T));
+            var serviceProxyType = typeof(ServiceProxy<>).MakeGenericType(typeof(T));
             var serviceProxy = Activator.CreateInstance(serviceProxyType, this /* GrpcClient */);
 
             var proxy = ProxyGenerator.CreateInterfaceProxyWithoutTarget(
@@ -48,7 +48,7 @@ namespace GrpcRemoting
 
         internal void CallbackToSetCallContext(MethodInfo mi) => pHand.BeforeBuildMethodCallMessage(mi);
 
-		public MethodCallMessageBuilder pMessBuild = new();
+		public MethodCallMessageBuilder MethodCallMessageBuilder = new();
 		public ISerializerAdapter pSerializer = new BinarySerializerAdapter();
 
         internal async Task InvokeAsync(byte[] req, Func<byte[], Func<byte[], Task>, Task> reponse)

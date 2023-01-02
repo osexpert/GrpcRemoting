@@ -11,9 +11,9 @@ namespace ServerNet60
 {
     internal class GrpcRemotingMethodProvider : IServiceMethodProvider<GrpcRemotingService>
     {
-        GrpcRemotingServer pServ;
+        RemotingServer pServ;
 
-        public GrpcRemotingMethodProvider(GrpcRemotingServer server)
+        public GrpcRemotingMethodProvider(RemotingServer server)
         {
             pServ = server;
         }

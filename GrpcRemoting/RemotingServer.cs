@@ -23,7 +23,7 @@ namespace GrpcRemoting
 		// FIXME: make option to choose formatter per method?
 	}
 
-	public class GrpcRemotingServer
+	public class RemotingServer
 	{
 
 		MethodCallMessageBuilder pMessBuilder = new();
@@ -33,7 +33,7 @@ namespace GrpcRemoting
 
         IGrpcRemotingServerHandler pHand;
 
-        public GrpcRemotingServer(IGrpcRemotingServerHandler hand)
+        public RemotingServer(IGrpcRemotingServerHandler hand)
 		{
 			pHand = hand;
 

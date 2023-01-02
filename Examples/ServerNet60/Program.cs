@@ -28,9 +28,9 @@ namespace ServerNet60
 
             var p = new Program();
 
-            GrpcRemotingServer.RegisterService(typeof(TestService), typeof(ITestService));
+            RemotingServer.RegisterService(typeof(TestService), typeof(ITestService));
 
-            var server = new GrpcRemotingServer(p);
+            var server = new RemotingServer(p);
 
             var builder = WebApplication.CreateBuilder(args);
 

@@ -13,15 +13,15 @@ using stakx.DynamicProxy;
 
 namespace GrpcRemoting
 {
-	public class GrpcRemotingClientProxy<T> : AsyncInterceptor
+	public class ServiceProxy<T> : AsyncInterceptor
 	{
-		GrpcRemotingClient pClient;
-		string pServiceName;
+		RemotingClient _client;
+		string _serviceName;
 
-		public GrpcRemotingClientProxy(GrpcRemotingClient cli)
+		public ServiceProxy(RemotingClient client)
 		{
-			pClient = cli;
-			pServiceName = typeof(T).Name;
+			_client = client;
+			_serviceName = typeof(T).Name;
 		}
 
 		protected override void Intercept(IInvocation invocation)
@@ -31,17 +31,21 @@ namespace GrpcRemoting
 
 			var arguments = MapArguments(args);
 
-			pClient.CallbackToSetCallContext(targetMethod);
+			_client.CallbackToSetCallContext(targetMethod);
 
-			var mess = pClient.pMessBuild.BuildMethodCallMessage(pClient.pSerializer, pServiceName, targetMethod, arguments);
+			var callMessage = _client.MethodCallMessageBuilder.BuildMethodCallMessage(
+				serializer: _client.pSerializer, 
+				remoteServiceName: _serviceName, 
+				targetMethod: targetMethod, 
+				args: arguments);
 
-			var wm = new WireCallMessage() { Data = mess };
+			var wireCallMsg = new WireCallMessage() { Data = callMessage };
 
-			var bytes = pClient.pSerializer.Serialize(wm);
+			var bytes = _client.pSerializer.Serialize(wireCallMsg);
 
 			MethodCallResultMessage resultMessage = null;
 			
-			pClient.Invoke(bytes, async (callback, res) =>
+			_client.Invoke(bytes, async (callback, res) =>
 			{
 				resultMessage = await HandleResponseAsync(callback, res, args).ConfigureAwait(false);
 			});
@@ -73,11 +77,13 @@ namespace GrpcRemoting
 			}
 
 			invocation.ReturnValue = resultMessage.ReturnValue;
-		}
+
+            CallContext.RestoreFromSnapshot(resultMessage.CallContextSnapshot);
+        }
 
 		private async Task<MethodCallResultMessage> HandleResponseAsync(byte[] callback, Func<byte[], Task> res, object[] args)
 		{
-			var callbackData = pClient.pSerializer.Deserialize<WireResponseMessage>(callback);
+			var callbackData = _client.pSerializer.Deserialize<WireResponseMessage>(callback);
 
 			switch (callbackData.ResponseType)
 			{
@@ -86,9 +92,9 @@ namespace GrpcRemoting
 
 				case ResponseType.Delegate:
 					{
-						var dele = (DelegateCallMessage)callbackData.Data;
+						var delegateMsg = (DelegateCallMessage)callbackData.Data;
 
-						var d = (Delegate)args[dele.Position];
+						var delegt = (Delegate)args[delegateMsg.Position];
 
 						// not possible with async here?
 						object result = null;
@@ -97,9 +103,9 @@ namespace GrpcRemoting
 						try
 						{
 							// FIXME: but we need to know if the delegate has a result or not???!!!
-							result = d.DynamicInvoke(dele.Arguments);
+							result = delegt.DynamicInvoke(delegateMsg.Arguments);
 						}
-						catch (Exception ex) when (!dele.OneWay) // PS: not eating exceptions here. what happen to the exception??
+						catch (Exception ex) when (!delegateMsg.OneWay) // PS: not eating exceptions here. what happen to the exception??
 						{
 							Exception ex2 = null;
 							if (ex is TargetInvocationException tie)
@@ -108,7 +114,7 @@ namespace GrpcRemoting
 							exception = ex2.GetType().IsSerializable ? ex2 : new RemoteInvocationException(ex2.Message);
 						}
 
-						if (dele.OneWay)
+						if (delegateMsg.OneWay)
 							return null;
 
 						DelegateCallResultMessage msg = null;
@@ -117,7 +123,7 @@ namespace GrpcRemoting
 						else
 							msg = new DelegateCallResultMessage() { Result = result };
 
-						var data = pClient.pSerializer.Serialize(msg);
+						var data = _client.pSerializer.Serialize(msg);
 						await res(data).ConfigureAwait(false);
 					}
 					break;
@@ -135,18 +141,22 @@ namespace GrpcRemoting
 
 			var arguments = MapArguments(args);
 
-            pClient.CallbackToSetCallContext(targetMethod);
+            _client.CallbackToSetCallContext(targetMethod);
 
-            var mess = pClient.pMessBuild.BuildMethodCallMessage(pClient.pSerializer, pServiceName, targetMethod, arguments);
+            var callMessage = _client.MethodCallMessageBuilder.BuildMethodCallMessage(
+				serializer: _client.pSerializer, 
+				remoteServiceName: _serviceName, 
+				targetMethod: targetMethod, 
+				args: arguments);
 
-			var wm = new WireCallMessage() { Data = mess };
+			var wireCallMsg = new WireCallMessage() { Data = callMessage };
 
-			var bytes = pClient.pSerializer.Serialize(wm);
+			var bytes = _client.pSerializer.Serialize(wireCallMsg);
 
 			MethodCallResultMessage resultMessage = null;
 
 			//await?
-			await pClient.InvokeAsync(bytes, async (callback, reqq) =>
+			await _client.InvokeAsync(bytes, async (callback, reqq) =>
 			{
 				resultMessage = await HandleResponseAsync(callback, reqq, args.ToArray()).ConfigureAwait(false);
 			}).ConfigureAwait(false);
@@ -165,7 +175,9 @@ namespace GrpcRemoting
 			// out|ref not possible with async
 
 			invocation.Result = resultMessage.ReturnValue;
-		}
+
+            CallContext.RestoreFromSnapshot(resultMessage.CallContextSnapshot);
+        }
 
 		/// <summary>
 		/// Maps non serializable arguments into a serializable form.
@@ -201,18 +213,12 @@ namespace GrpcRemoting
 				return false;
 			}
 
-			var meth = argumentType.GetMethod("Invoke");
-			//var delegateReturnType = meth?.ReturnType;
-
-//			bool hasResult = false;
-	//		if (delegateReturnType != typeof(void))
-		//	{
-			//	hasResult = true;
-			//}
+			var delegateReturnType = argumentType.GetMethod("Invoke").ReturnType;
 
 			var remoteDelegateInfo =
 				new RemoteDelegateInfo(
-					delegateTypeName: argumentType.FullName, hasResult: meth.ReturnType != typeof(void));
+					delegateTypeName: argumentType.FullName, 
+					hasResult: delegateReturnType != typeof(void));
 
 			mappedArgument = remoteDelegateInfo;
 			return true;
