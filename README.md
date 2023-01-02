@@ -11,9 +11,10 @@ Method that return IAsyncEnumerable and yield (crashes)
 Async Func's, eg. an argument like Task Message(Func<string, Task<string>> message) (crashes)  
 
 CoreRemoting use websockets while GrpcRemoting is a rewrite (sort of) to use Grpc instead.  
-GrpcRemoting only support BinaryFormatter, while CoreRemoting also supported BSON.  
+GrpcRemoting only support BinaryFormatter, while CoreRemoting also supported BSON.
+Encryption, authentication, session management, DependencyInjection, Linq expression arguments are also remved (maybe some can be added back if demand).
 Idea in the future is to support MessagePack or MemoryPack in addition.
-Idea is to make it possible to specify formatter on a per method basis, so slowly can migrate away from BinaryFormatter.  
+Idea is to make it possible to specify formatter on a per method basis, so slowly can migrate away from BinaryFormatter, method by method.
 GrpcRemoting does not use .proto files but simply interfaces. Look at the examples for info, there is no documentation.  
 
 Other Rpc framework of interest:
