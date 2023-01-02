@@ -13,22 +13,15 @@ using GrpcRemoting.Serialization.Binary;
 
 namespace GrpcRemoting
 {
-	public interface IGrpcRemotingClientHandler
-	{
-		// set CallContext
-		void BeforeBuildMethodCallMessage(MethodInfo mi);
-
-        // TODO: choose formatter per method??
-    }
 
     public class RemotingClient
 	{
-        public IGrpcRemotingClientHandler pHand;
+        ClientConfig _config;
         CallInvoker _callInvoker;
 
-        public RemotingClient(CallInvoker callInvoker, IGrpcRemotingClientHandler hand)
+        public RemotingClient(CallInvoker callInvoker, ClientConfig config)
 		{
-			pHand = hand;
+			_config = config;
             _callInvoker = callInvoker;
         }
 
@@ -46,7 +39,7 @@ namespace GrpcRemoting
             return (T)proxy;
         }
 
-        internal void CallbackToSetCallContext(MethodInfo mi) => pHand.BeforeBuildMethodCallMessage(mi);
+        internal void BeforeMethodCall(Type serviceType, MethodInfo mi) => _config.BeforeMethodCall?.Invoke(serviceType, mi);
 
 		public MethodCallMessageBuilder MethodCallMessageBuilder = new();
 		public ISerializerAdapter Serializer = new BinarySerializerAdapter();

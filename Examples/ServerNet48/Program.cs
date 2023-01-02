@@ -10,7 +10,7 @@ using ServerShared;
 
 namespace ServerNet48
 {
-    internal class Program : IGrpcRemotingServerHandler
+    internal class Program
     {
 
         /// <param name="args"></param>
@@ -27,7 +27,7 @@ namespace ServerNet48
         {
             RemotingServer.RegisterService(typeof(TestService), typeof(ITestService));
 
-            var remServer = new RemotingServer(this);
+            var remServer = new RemotingServer(new ServerConfig { CreateInstance = CreateInstance });
 
             var options = new List<ChannelOption>();
             options.Add(new ChannelOption(ChannelOptions.MaxReceiveMessageLength, int.MaxValue));

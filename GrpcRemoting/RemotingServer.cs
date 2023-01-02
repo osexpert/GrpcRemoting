@@ -17,11 +17,6 @@ using System.Xml.Linq;
 
 namespace GrpcRemoting
 {
-	public interface IGrpcRemotingServerHandler
-	{
-		object CreateInstance(Type serviceType);
-		// FIXME: make option to choose formatter per method?
-	}
 
 	public class RemotingServer
 	{
@@ -31,12 +26,11 @@ namespace GrpcRemoting
 		//private ConcurrentDictionary<(Type, int), DelegateProxy> _delegateProxyCache = new();
 		static ConcurrentDictionary<string, Type> _services = new();
 
-        IGrpcRemotingServerHandler pHand;
+		ServerConfig _config;
 
-        public RemotingServer(IGrpcRemotingServerHandler hand)
+        public RemotingServer(ServerConfig config)
 		{
-			pHand = hand;
-
+            _config = config;
         }
 
 		private object GetService(string serviceName)
@@ -44,7 +38,10 @@ namespace GrpcRemoting
 			if (!_services.TryGetValue(serviceName, out var serviceType))
 				throw new Exception("Service not registered: " + serviceName);
 
-			return pHand.CreateInstance(serviceType);
+			if (_config.CreateInstance != null)
+				return _config.CreateInstance(serviceType);
+			else
+				return Activator.CreateInstance(serviceType);
         }
 
 		private Type GetServiceType(string serviceName)

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace ClientNet60
 {
-    internal class Program : IGrpcRemotingClientHandler
+    internal class Program
     {
         static void Main(string[] args)
         {
@@ -28,7 +28,7 @@ namespace ClientNet60
 
             var channel = GrpcChannel.ForAddress("http://localhost:5000");
             
-            var c = new RemotingClient(channel.CreateCallInvoker(), this);
+            var c = new RemotingClient(channel.CreateCallInvoker(), new ClientConfig { BeforeMethodCall = BeforeBuildMethodCallMessage });
 
             var testServ = c.CreateServiceProxy<ITestService>();
 
@@ -38,7 +38,7 @@ namespace ClientNet60
 
         Guid pSessID = Guid.NewGuid();
 
-        public void BeforeBuildMethodCallMessage(MethodInfo mi)
+        public void BeforeBuildMethodCallMessage(Type t, MethodInfo mi)
         {
             CallContext.SetData("SessionId", pSessID);
         }

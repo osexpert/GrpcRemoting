@@ -30,7 +30,8 @@ namespace GrpcRemoting
 
 			var arguments = MapArguments(args);
 
-			_client.CallbackToSetCallContext(targetMethod);
+			// FIXME: we should be able to check some attribute on the service interface to decide things:-)
+			_client.BeforeMethodCall(typeof(T), targetMethod);
 
 			var callMessage = _client.MethodCallMessageBuilder.BuildMethodCallMessage(
 				serializer: _client.Serializer, 
@@ -133,7 +134,7 @@ namespace GrpcRemoting
 
 			var arguments = MapArguments(args);
 
-            _client.CallbackToSetCallContext(targetMethod);
+            _client.BeforeMethodCall(typeof(T), targetMethod);
 
             var callMessage = _client.MethodCallMessageBuilder.BuildMethodCallMessage(
 				serializer: _client.Serializer, 

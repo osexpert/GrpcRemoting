@@ -11,7 +11,7 @@ using ServerShared;
 
 namespace ServerNet60
 {
-    internal class Program : IGrpcRemotingServerHandler
+    internal class Program
     {
         /// <summary>
         /// grpc-dotnet/perf/benchmarkapps/QpsWorker
@@ -30,7 +30,7 @@ namespace ServerNet60
 
             RemotingServer.RegisterService(typeof(TestService), typeof(ITestService));
 
-            var server = new RemotingServer(p);
+            var server = new RemotingServer(new ServerConfig { CreateInstance = p.CreateInstance });
 
             var builder = WebApplication.CreateBuilder(args);
 
