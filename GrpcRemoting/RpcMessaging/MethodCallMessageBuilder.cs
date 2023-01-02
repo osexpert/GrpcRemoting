@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using GrpcRemoting.Serialization;
-using GrpcRemoting.Serialization.Bson;
 
 namespace GrpcRemoting.RpcMessaging
 {
@@ -83,21 +82,13 @@ namespace GrpcRemoting.RpcMessaging
 				{
 					for (var j = i; j < args.Length; j++)
 					{
-						paramArrayValues.Add(
-							serializer.EnvelopeNeededForParameterSerialization
-								? new Envelope(args[j])
-								: args[j]);
+						paramArrayValues.Add(args[j]);
 					}
 				}
 
 				var isArgNull = arg == null;
 
-				object parameterValue =
-					useParamArray
-						? paramArrayValues.ToArray()
-						: serializer.EnvelopeNeededForParameterSerialization
-							? new Envelope(arg)
-							: arg;
+				object parameterValue =	useParamArray ? paramArrayValues.ToArray() : arg;
 
 				yield return
 					new MethodCallParameterMessage()
@@ -135,10 +126,7 @@ namespace GrpcRemoting.RpcMessaging
 			var message = new MethodCallResultMessage()
 			{
 				IsReturnValueNull = isReturnValueNull,
-				ReturnValue =
-					serializer.EnvelopeNeededForParameterSerialization
-						? new Envelope(returnValue)
-						: returnValue
+				ReturnValue = returnValue
 			};
 
 			var outParameters = new List<MethodCallOutParameterMessage>();
@@ -153,23 +141,11 @@ namespace GrpcRemoting.RpcMessaging
 
 				var isArgNull = arg == null;
 
-				// FIXME: why was every argument serialized individually???
-				/*
-				var serializedArgValue =
-					serializer.Serialize(
-						serializer.EnvelopeNeededForParameterSerialization
-							? typeof(Envelope)
-							: parameterInfo.ParameterType,
-						serializer.EnvelopeNeededForParameterSerialization
-							? new Envelope(arg)
-							: arg);
-				*/
-
 				outParameters.Add(
 					new MethodCallOutParameterMessage()
 					{
 						ParameterName = parameterInfo.Name,
-						OutValue = arg,//serializedArgValue,
+						OutValue = arg,
 						IsOutValueNull = isArgNull
 					});
 			}

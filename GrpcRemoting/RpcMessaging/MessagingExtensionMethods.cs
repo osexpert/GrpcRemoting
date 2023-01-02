@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using GrpcRemoting.Serialization.Bson;
 
 namespace GrpcRemoting.RpcMessaging
 {
@@ -31,15 +30,7 @@ namespace GrpcRemoting.RpcMessaging
                 if (parameterType == null)
                     throw new Exception("Parameter type not found: " + parameter.ParameterTypeName);
                 parameterTypes[i] = parameterType;
-
-                parameterValues[i] =
-                    parameter.IsValueNull
-                        ? null
-                        : parameter.Value is Envelope envelope
-                            ? envelope.Value == null 
-                                ? null
-                                : Convert.ChangeType(envelope.Value, envelope.Type)
-                            : parameter.Value;
+                parameterValues[i] = parameter.IsValueNull ? null : parameter.Value;
             }
         }
     }

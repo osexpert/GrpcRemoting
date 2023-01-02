@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Castle.DynamicProxy;
 using GrpcRemoting.RemoteDelegates;
 using GrpcRemoting.RpcMessaging;
-using GrpcRemoting.Serialization.Bson;
 using stakx.DynamicProxy;
 
 namespace GrpcRemoting
@@ -65,15 +64,8 @@ namespace GrpcRemoting
 
 			foreach (var outParameterValue in resultMessage.OutParameters)
 			{
-				var parameterInfo =
-					parameterInfos.First(p => p.Name == outParameterValue.ParameterName);
-
-				args[parameterInfo.Position] =
-					outParameterValue.IsOutValueNull
-						? null
-						: outParameterValue.OutValue is Envelope outParamEnvelope
-							? outParamEnvelope.Value
-							: outParameterValue.OutValue;
+				var parameterInfo = parameterInfos.First(p => p.Name == outParameterValue.ParameterName);
+				args[parameterInfo.Position] = outParameterValue.IsOutValueNull ? null : outParameterValue.OutValue;
 			}
 
 			invocation.ReturnValue = resultMessage.ReturnValue;

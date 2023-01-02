@@ -26,10 +26,10 @@ namespace GrpcRemoting
 	public class RemotingServer
 	{
 
-		MethodCallMessageBuilder pMessBuilder = new();
+		MethodCallMessageBuilder MethodCallMessageBuilder = new();
 
 		//private ConcurrentDictionary<(Type, int), DelegateProxy> _delegateProxyCache = new();
-		static ConcurrentDictionary<string, Type> hsServices = new();
+		static ConcurrentDictionary<string, Type> _services = new();
 
         IGrpcRemotingServerHandler pHand;
 
@@ -41,7 +41,7 @@ namespace GrpcRemoting
 
 		private object GetService(string serviceName)
 		{
-			if (!hsServices.TryGetValue(serviceName, out var serviceType))
+			if (!_services.TryGetValue(serviceName, out var serviceType))
 				throw new Exception("Service not registered: " + serviceName);
 
 			return pHand.CreateInstance(serviceType);
@@ -49,7 +49,7 @@ namespace GrpcRemoting
 
 		private Type GetServiceType(string serviceName)
 		{
-			if (hsServices.TryGetValue(serviceName, out var serviceType))
+			if (_services.TryGetValue(serviceName, out var serviceType))
 				return serviceType;
 
 			throw new Exception("Service not registered: " + serviceName);
@@ -60,6 +60,7 @@ namespace GrpcRemoting
 		/// </summary>
 		/// <param name="arguments">Array of parameter values</param>
 		/// <param name="argumentTypes">Array of parameter types</param>
+		/// <param name="callDelegate"></param>
 		/// <returns>Array of arguments (includes mapped ones)</returns>
 		private object[] MapArguments(object[] arguments, Type[] argumentTypes, Func<DelegateCallMessage, object> callDelegate)
 		{
@@ -84,7 +85,9 @@ namespace GrpcRemoting
 		/// Maps a delegate argument into a delegate proxy.
 		/// </summary>
 		/// <param name="argument">argument value</param>
+		/// <param name="position"></param>
 		/// <param name="mappedArgument">Out: argument value where delegate value is mapped into delegate proxy</param>
+		/// <param name="callDelegate"></param>
 		/// <returns>True if mapping applied, otherwise false</returns>
 		/// <exception cref="ArgumentNullException">Thrown if no session is provided</exception>
 		private bool MapDelegateArgument(object argument, int position, out object mappedArgument, Func<DelegateCallMessage, object> callDelegate)
@@ -120,12 +123,23 @@ namespace GrpcRemoting
 			return true;
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="ifaceName"></param>
+		/// <exception cref="Exception"></exception>
 		public static void RegisterService(Type type, string ifaceName)
 		{
-			if (!hsServices.TryAdd(ifaceName, type))
+			if (!_services.TryAdd(ifaceName, type))
 				throw new Exception("Service already added: " + ifaceName);
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="iface"></param>
 		public static void RegisterService(Type type, Type iface) => RegisterService(type, iface.Name);
 
         private async Task RpcCall(ISerializerAdapter serializer, byte[] request, Func<Task<byte[]>> req, Func<byte[], Task> reponse)
@@ -249,7 +263,7 @@ namespace GrpcRemoting
 				if (!oneWay)
 				{
 					resultMessage =
-						pMessBuilder.BuildMethodCallResultMessage(
+						MethodCallMessageBuilder.BuildMethodCallResultMessage(
 								serializer: serializer,
 								method: method,
 								args: parameterValues,
@@ -278,13 +292,28 @@ namespace GrpcRemoting
 
         static ISerializerAdapter sBinaryFormatter = new BinarySerializerAdapter();
 
-        public Task RpcCallBinaryFormatter(IAsyncStreamReader<byte[]> requestStream, IServerStreamWriter<byte[]> responseStream, ServerCallContext context)
+        /// <summary>
+		/// 
+		/// </summary>
+		/// <param name="requestStream"></param>
+		/// <param name="responseStream"></param>
+		/// <param name="context"></param>
+		/// <returns></returns>
+		public Task RpcCallBinaryFormatter(IAsyncStreamReader<byte[]> requestStream, IServerStreamWriter<byte[]> responseStream, ServerCallContext context)
 		{
 			return RpcCall(sBinaryFormatter, requestStream, responseStream, context);
         }
 
 
-        public async Task RpcCall(ISerializerAdapter serializer, IAsyncStreamReader<byte[]> requestStream, IServerStreamWriter<byte[]> responseStream, ServerCallContext context)
+        /// <summary>
+		/// 
+		/// </summary>
+		/// <param name="serializer"></param>
+		/// <param name="requestStream"></param>
+		/// <param name="responseStream"></param>
+		/// <param name="context"></param>
+		/// <returns></returns>
+		public async Task RpcCall(ISerializerAdapter serializer, IAsyncStreamReader<byte[]> requestStream, IServerStreamWriter<byte[]> responseStream, ServerCallContext context)
 		{
 			try
 			{
@@ -314,10 +343,21 @@ namespace GrpcRemoting
 
 	}
 
+	/// <summary>
+	/// 
+	/// </summary>
 	public class Descriptors
 	{
+		/// <summary>
+		/// 
+		/// </summary>
 		public static Method<byte[], byte[]> RpcCallBinaryFormatter = GetRpcCall("BinaryFormatter");
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="name"></param>
+		/// <returns></returns>
 		public static Method<byte[], byte[]> GetRpcCall(string name)
 		{
 			return new Method<byte[], byte[]>(

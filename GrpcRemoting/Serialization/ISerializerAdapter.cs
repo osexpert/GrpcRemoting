@@ -8,11 +8,6 @@ namespace GrpcRemoting.Serialization
     public interface ISerializerAdapter
     {
         /// <summary>
-        /// Gets whether parameter values must be put in an envelope object for proper deserialization, or not. 
-        /// </summary>
-        bool EnvelopeNeededForParameterSerialization { get; }
-        
-        /// <summary>
         /// Serializes an object graph.
         /// </summary>
         /// <param name="graph">Object graph to be serialized</param>

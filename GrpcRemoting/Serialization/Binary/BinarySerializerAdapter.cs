@@ -96,9 +96,5 @@ namespace GrpcRemoting.Serialization.Binary
             return binaryFormatter.DeserializeSafe(rawData);
         }
         
-        /// <summary>
-        /// Gets whether parameter values must be put in an envelope object for proper deserialization, or not. 
-        /// </summary>
-        public bool EnvelopeNeededForParameterSerialization => false;
     }
 }
