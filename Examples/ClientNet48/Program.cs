@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Remoting.Channels;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,9 +23,9 @@ namespace ClientNet48
 
         public void Go()
         {
-            var channel = new Channel("localhost", 5000, ChannelCredentials.Insecure);
+			var channel = new Channel("localhost", 5000, ChannelCredentials.Insecure);
             var c = new RemotingClient(channel.CreateCallInvoker(), new ClientConfig { BeforeMethodCall = BeforeBuildMethodCallMessage });
-            var testServ = c.CreateServiceProxy<ITestService>();
+            var testServ = c.CreateProxy<ITestService>();
 
             var cs = new ClientTest();
             cs.Test(testServ);

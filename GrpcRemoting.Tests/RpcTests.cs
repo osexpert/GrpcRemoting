@@ -1,13 +1,14 @@
-#if false
 using System;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
+using Grpc.Core;
 using GrpcRemoting.Tests.ExternalTypes;
 using GrpcRemoting.Tests.Tools;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace CoreRemoting.Tests
+namespace GrpcRemoting.Tests
 {
     public class RpcTests
     {
@@ -19,7 +20,7 @@ namespace CoreRemoting.Tests
         }
 
         [Fact]
-        public void Call_on_Proxy_should_be_invoked_on_remote_service()
+        public async Task Call_on_Proxy_should_be_invoked_on_remote_service()
         {
             bool remoteServiceCalled = false;
 
@@ -36,39 +37,33 @@ namespace CoreRemoting.Tests
             var serverConfig =
                 new ServerConfig()
                 {
-                    NetworkPort = 9094,
-                    RegisterServicesAction = container =>
-                        container.RegisterService<ITestService>(
-                            factoryDelegate: () => testService,
-                            lifetime: ServiceLifetime.Singleton)
+                    //RegisterServicesAction = container =>
+                    //    container.RegisterService<ITestService>(
+                    //        factoryDelegate: () => testService,
+                    //        lifetime: ServiceLifetime.Singleton)
+                    CreateInstance = (t) => testService
                 };
 
-            int serverErrorCount = 0;
-            
-            using var server = new RemotingServer(serverConfig);
-            server.Error += (_, _) => serverErrorCount++;
-            server.Start();
-
-            void ClientAction()
+            await using var server = new NativeServer(9094, serverConfig);
+			server.Start();
+			server.RegisterService<ITestService, TestService>();
+			
+            async Task ClientAction()
             {
                 try
                 {
                     var stopWatch = new Stopwatch();
                     stopWatch.Start();
-                    
-                    using var client = new RemotingClient(new ClientConfig()
-                    {
-                        ConnectionTimeout = 0, 
-                        ServerPort = 9094
-                    });
+
+                    await using var client = new NativeClient(9094, new ClientConfig());
 
                     stopWatch.Stop();
                     _testOutputHelper.WriteLine($"Creating client took {stopWatch.ElapsedMilliseconds} ms");
                     stopWatch.Reset();
                     stopWatch.Start();
-                    
-                    client.Connect();
 
+					//client.Connect();
+					
                     stopWatch.Stop();
                     _testOutputHelper.WriteLine($"Establishing connection took {stopWatch.ElapsedMilliseconds} ms");
                     stopWatch.Reset();
@@ -107,16 +102,18 @@ namespace CoreRemoting.Tests
                 }
             }
 
-            var clientThread = new Thread(ClientAction);
+            var clientThread = new Thread(async () =>
+            {
+                await ClientAction();
+            });
             clientThread.Start();
             clientThread.Join();
             
             Assert.True(remoteServiceCalled);
-            Assert.Equal(0, serverErrorCount);
         }
         
         [Fact]
-        public void Call_on_Proxy_should_be_invoked_on_remote_service_without_MessageEncryption()
+        public async Task Call_on_Proxy_should_be_invoked_on_remote_service_without_MessageEncryption()
         {
             bool remoteServiceCalled = false;
 
@@ -133,40 +130,33 @@ namespace CoreRemoting.Tests
             var serverConfig =
                 new ServerConfig()
                 {
-                    MessageEncryption = false,
-                    NetworkPort = 9094,
-                    RegisterServicesAction = container =>
-                        container.RegisterService<ITestService>(
-                            factoryDelegate: () => testService,
-                            lifetime: ServiceLifetime.Singleton)
+                    //RegisterServicesAction = container =>
+                    //    container.RegisterService<ITestService>(
+                    //        factoryDelegate: () => testService,
+                    //        lifetime: ServiceLifetime.Singleton)
+                    CreateInstance = (t) => testService
                 };
 
-            int serverErrorCount = 0;
-            
-            using var server = new RemotingServer(serverConfig);
-            server.Error += (_, _) => serverErrorCount++;
-            server.Start();
+          
+            await using var server = new NativeServer(9094, serverConfig);
+			server.RegisterService<ITestService, TestService>();
+			server.Start();
 
-            void ClientAction()
+            async Task ClientAction()
             {
                 try
                 {
                     var stopWatch = new Stopwatch();
                     stopWatch.Start();
-                    
-                    using var client = new RemotingClient(new ClientConfig()
-                    {
-                        ConnectionTimeout = 0, 
-                        ServerPort = 9094,
-                        MessageEncryption = false
-                    });
+
+                    await using var client = new NativeClient(9094, new ClientConfig());
 
                     stopWatch.Stop();
                     _testOutputHelper.WriteLine($"Creating client took {stopWatch.ElapsedMilliseconds} ms");
                     stopWatch.Reset();
                     stopWatch.Start();
                     
-                    client.Connect();
+                    //client.Connect();
 
                     stopWatch.Stop();
                     _testOutputHelper.WriteLine($"Establishing connection took {stopWatch.ElapsedMilliseconds} ms");
@@ -202,16 +192,18 @@ namespace CoreRemoting.Tests
                 }
             }
 
-            var clientThread = new Thread(ClientAction);
+            var clientThread = new Thread(async () => 
+            { 
+                await ClientAction(); 
+            });
             clientThread.Start();
             clientThread.Join();
             
             Assert.True(remoteServiceCalled);
-            Assert.Equal(0, serverErrorCount);
         }
 
         [Fact]
-        public void Delegate_invoked_on_server_should_callback_client()
+        public async Task Delegate_invoked_on_server_should_callback_client()
         {
             string argumentFromServer = null;
 
@@ -220,31 +212,21 @@ namespace CoreRemoting.Tests
             var serverConfig =
                 new ServerConfig()
                 {
-                    NetworkPort = 9095,
-                    RegisterServicesAction = container =>
-                        container.RegisterService<ITestService>(
-                            factoryDelegate: () => testService,
-                            lifetime: ServiceLifetime.Singleton)
+                    //RegisterServicesAction = container =>
+                    //    container.RegisterService<ITestService>(
+                    //        factoryDelegate: () => testService,
+                    //        lifetime: ServiceLifetime.Singleton)
                 };
 
-            int serverErrorCount = 0;
-            
-            using var server = new RemotingServer(serverConfig);
-            server.Error += (_, _) => serverErrorCount++;
-            server.Start();
+            await using var server = new NativeServer(9095, serverConfig);
+			server.RegisterService<ITestService, TestService>();
+			server.Start();
 
-            void ClientAction()
+            async Task ClientAction()
             {
                 try
                 {
-                    using var client = new RemotingClient(
-                        new ClientConfig()
-                        {
-                            ConnectionTimeout = 0, 
-                            ServerPort = 9095,
-                        });
-
-                    client.Connect();
+                    await using var client = new NativeClient(9095, new ClientConfig());
 
                     var proxy = client.CreateProxy<ITestService>();
                     proxy.TestMethodWithDelegateArg(arg => argumentFromServer = arg);
@@ -256,58 +238,53 @@ namespace CoreRemoting.Tests
                 }
             }
 
-            var clientThread = new Thread(ClientAction);
+            var clientThread = new Thread(async () =>
+            {
+                await ClientAction();
+            });
             clientThread.Start();
             clientThread.Join();
                 
             Assert.Equal("test", argumentFromServer);
-            Assert.Equal(0, serverErrorCount);
         }
         
         [Fact]
-        public void Events_should_work_remotly()
+        public async Task Events_should_NOT_work_remotly()
         {
             var testService = new TestService();
-            
+
             var serverConfig =
                 new ServerConfig()
                 {
-                    NetworkPort = 9096,
-                    RegisterServicesAction = container =>
-                        container.RegisterService<ITestService>(
-                            factoryDelegate: () => testService,
-                            lifetime: ServiceLifetime.Singleton)
+                    //RegisterServicesAction = container =>
+                    //    container.RegisterService<ITestService>(
+                    //        factoryDelegate: () => testService,
+                    //        lifetime: ServiceLifetime.Singleton)
+                    CreateInstance = (t) => testService
                 };
 
-            int serverErrorCount = 0;
             bool serviceEventCalled = false;
             
-            using var server = new RemotingServer(serverConfig);
-            server.Error += (_, _) => serverErrorCount++;
+            await using var server = new NativeServer(9096, serverConfig);
+            server.RegisterService<ITestService, TestService>();
             server.Start();
-            
-            using var client = new RemotingClient(
-                new ClientConfig()
-                {
-                    ConnectionTimeout = 0, 
-                    ServerPort = 9096
-                });
 
-            client.Connect();
+            await using var client = new NativeClient(9096, new ClientConfig());
 
             var proxy = client.CreateProxy<ITestService>();
             
-            proxy.ServiceEvent += () => 
-                serviceEventCalled = true;
-            
-            proxy.FireServiceEvent();
+            // Does not support this. But maybe we should fail better than we do currently?
+            // Calling a delegate in client from server is in GrpcRemoting only supported while the call is active,
+            // because only then is the callback channel open.
+            proxy.ServiceEvent += () => serviceEventCalled = true;
 
-            Assert.True(serviceEventCalled);
-            Assert.Equal(0, serverErrorCount);
+            Assert.Throws<System.Threading.Channels.ChannelClosedException>(() => proxy.FireServiceEvent());
+
+            Assert.False(serviceEventCalled);
         }
         
         [Fact]
-        public void External_types_should_work_as_remote_service_parameters()
+        public async Task External_types_should_work_as_remote_service_parameters()
         {
             bool remoteServiceCalled = false;
             DataClass parameterValue = null;
@@ -321,34 +298,27 @@ namespace CoreRemoting.Tests
                         parameterValue = arg;
                     }
                 };
-            
+
             var serverConfig =
                 new ServerConfig()
                 {
-                    NetworkPort = 9097,
-                    RegisterServicesAction = container =>
-                        container.RegisterService<ITestService>(
-                            factoryDelegate: () => testService,
-                            lifetime: ServiceLifetime.Singleton)
+                    //RegisterServicesAction = container =>
+                    //    container.RegisterService<ITestService>(
+                    //        factoryDelegate: () => testService,
+                    //        lifetime: ServiceLifetime.Singleton)
+                    CreateInstance = (t) => testService
                 };
 
-            int serverErrorCount = 0;
-            
-            using var server = new RemotingServer(serverConfig);
-            server.Error += (_, _) => serverErrorCount++;
+           
+            await using var server = new NativeServer(9097, serverConfig);
+            server.RegisterService<ITestService, TestService>();
             server.Start();
 
-            void ClientAction()
+            async Task ClientAction()
             {
                 try
                 {
-                    using var client = new RemotingClient(new ClientConfig()
-                    {
-                        ConnectionTimeout = 0, 
-                        ServerPort = 9097
-                    });
-
-                    client.Connect();
+                    await using var client = new NativeClient(9097, new ClientConfig());
 
                     var proxy = client.CreateProxy<ITestService>();
                     proxy.TestExternalTypeParameter(new DataClass() {Value = 42});
@@ -362,12 +332,14 @@ namespace CoreRemoting.Tests
                 }
             }
 
-            var clientThread = new Thread(ClientAction);
+            var clientThread = new Thread(async () =>
+            {
+                await ClientAction();
+            });
             clientThread.Start();
             clientThread.Join();
             
             Assert.True(remoteServiceCalled);
-            Assert.Equal(0, serverErrorCount);
         }
         
         #region Service with generic method
@@ -388,27 +360,22 @@ namespace CoreRemoting.Tests
         #endregion
         
         [Fact]
-        public void Generic_methods_should_be_called_correctly()
+        public async Task Generic_methods_should_be_called_correctly()
         {
             var serverConfig =
                 new ServerConfig()
                 {
-                    NetworkPort = 9197,
-                    RegisterServicesAction = container =>
-                        container.RegisterService<IGenericEchoService, GenericEchoService>(
-                            lifetime: ServiceLifetime.Singleton)
+                    //RegisterServicesAction = container =>
+                    //    container.RegisterService<IGenericEchoService, GenericEchoService>(
+                    //        lifetime: ServiceLifetime.Singleton)
                 };
 
-            using var server = new RemotingServer(serverConfig);
+            await using var server = new NativeServer(9197, serverConfig);
+            server.RegisterService<IGenericEchoService, GenericEchoService>();
             server.Start();
 
-            using var client = new RemotingClient(new ClientConfig()
-            {
-                ConnectionTimeout = 0, 
-                ServerPort = 9197
-            });
+            await using var client = new NativeClient(9197, new ClientConfig());
 
-            client.Connect();
             var proxy = client.CreateProxy<IGenericEchoService>();
 
             var result = proxy.Echo("Yay");
@@ -440,27 +407,22 @@ namespace CoreRemoting.Tests
         #endregion
         
         [Fact]
-        public void Enum_arguments_should_be_passed_correctly()
+        public async Task Enum_arguments_should_be_passed_correctly()
         {
             var serverConfig =
                 new ServerConfig()
                 {
-                    NetworkPort = 9198,
-                    RegisterServicesAction = container =>
-                        container.RegisterService<IEnumTestService, EnumTestService>(
-                            lifetime: ServiceLifetime.Singleton)
+                    //RegisterServicesAction = container =>
+                    //    container.RegisterService<IEnumTestService, EnumTestService>(
+                    //        lifetime: ServiceLifetime.Singleton)
                 };
 
-            using var server = new RemotingServer(serverConfig);
-            server.Start();
+            await using var server = new NativeServer(9198, serverConfig);
+			server.RegisterService<IEnumTestService, EnumTestService>();
+			server.Start();
 
-            using var client = new RemotingClient(new ClientConfig()
-            {
-                ConnectionTimeout = 0, 
-                ServerPort = 9198
-            });
+            await using var client = new NativeClient(9198, new ClientConfig());
 
-            client.Connect();
             var proxy = client.CreateProxy<IEnumTestService>();
 
             var resultFirst = proxy.Echo(TestEnum.First);
@@ -471,4 +433,3 @@ namespace CoreRemoting.Tests
         }
     }
 }
-#endif

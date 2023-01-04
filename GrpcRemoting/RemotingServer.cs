@@ -24,7 +24,7 @@ namespace GrpcRemoting
 		MethodCallMessageBuilder MethodCallMessageBuilder = new();
 
 		//private ConcurrentDictionary<(Type, int), DelegateProxy> _delegateProxyCache = new();
-		static ConcurrentDictionary<string, Type> _services = new();
+		ConcurrentDictionary<string, Type> _services = new();
 
 		ServerConfig _config;
 
@@ -123,13 +123,17 @@ namespace GrpcRemoting
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="type"></param>
-		/// <param name="ifaceName"></param>
 		/// <exception cref="Exception"></exception>
-		public static void RegisterService(Type type, string ifaceName)
-		{
-			if (!_services.TryAdd(ifaceName, type))
-				throw new Exception("Service already added: " + ifaceName);
+		public void RegisterService<TInterface, TService>()
+
+        {
+			var iface = typeof(TInterface);
+
+            if (!iface.IsInterface)
+				throw new Exception($"{iface.Name} is not interface");
+
+            if (!_services.TryAdd(iface.Name, typeof(TService)))
+				throw new Exception("Service already added: " + iface.Name);
 		}
 
 		/// <summary>
@@ -137,7 +141,7 @@ namespace GrpcRemoting
 		/// </summary>
 		/// <param name="type"></param>
 		/// <param name="iface"></param>
-		public static void RegisterService(Type type, Type iface) => RegisterService(type, iface.Name);
+		//public void RegisterService(Type type, Type iface) => RegisterService(type, iface.Name);
 
         private async Task RpcCall(ISerializerAdapter serializer, byte[] request, Func<Task<byte[]>> req, Func<byte[], Task> reponse)
 		{

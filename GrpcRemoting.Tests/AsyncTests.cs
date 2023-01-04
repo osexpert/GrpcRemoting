@@ -1,4 +1,4 @@
-#if false
+using GrpcRemoting.Tests.Tools;
 using System;
 using System.IO;
 using System.Text;
@@ -47,23 +47,17 @@ namespace GrpcRemoting.Tests
             var serverConfig =
                 new ServerConfig()
                 {
-                    NetworkPort = 9196,
-                    RegisterServicesAction = container =>
-                        container.RegisterService<IAsyncService, AsyncService>(
-                            lifetime: ServiceLifetime.Singleton)
+                    //RegisterServicesAction = container =>
+                    //    container.RegisterService<IAsyncService, AsyncService>(
+                    //        lifetime: ServiceLifetime.Singleton)
                 };
 
-            using var server = new RemotingServer(serverConfig);
-            server.Start();
+            await using var server = new NativeServer(9196, serverConfig);
+			server.RegisterService<IAsyncService, AsyncService>();
+			server.Start();
 
-            using var client = new RemotingClient(new ClientConfig()
-            {
-                ConnectionTimeout = 0,
-                InvocationTimeout = 0,
-                ServerPort = 9196
-            });
+			await using var client = new NativeClient(9196, new ClientConfig());
 
-            client.Connect();
             var proxy = client.CreateProxy<IAsyncService>();
 
             var base64String = await proxy.ConvertToBase64Async("Yay");
@@ -75,34 +69,27 @@ namespace GrpcRemoting.Tests
         /// Awaiting for ordinary non-generic task method should not hangs. 
         /// </summary>
         [Fact(Timeout = 15000)]
-        public async void AwaitingNonGenericTask_should_not_hang_forever()
+        public async Task AwaitingNonGenericTask_should_not_hang_forever()
         {
             var port = 9197;
             
             var serverConfig =
                 new ServerConfig()
                 {
-                    NetworkPort = port,
-                    RegisterServicesAction = container =>
-                        container.RegisterService<IAsyncService, AsyncService>(
-                            lifetime: ServiceLifetime.Singleton)
+                    //RegisterServicesAction = container =>
+                    //    container.RegisterService<IAsyncService, AsyncService>(
+                    //        lifetime: ServiceLifetime.Singleton)
                 };
 
-            using var server = new RemotingServer(serverConfig);
-            server.Start();
+			await using var server = new NativeServer(port, serverConfig);
+			server.RegisterService<IAsyncService, AsyncService>();
+			server.Start();
 
-            using var client = new RemotingClient(new ClientConfig()
-            {
-                ConnectionTimeout = 0,
-                InvocationTimeout = 0,
-                ServerPort = port
-            });
+            await using var client = new NativeClient(port, new ClientConfig());
 
-            client.Connect();
             var proxy = client.CreateProxy<IAsyncService>();
 
             await proxy.NonGenericTask();
         }
     }
 }
-#endif

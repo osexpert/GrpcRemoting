@@ -27,7 +27,18 @@ namespace ClientShared
                 Console.WriteLine("Progress: " + pro);
             });
 
+
+
+
             Console.WriteLine("Enter 'CGM' to stop recieving messages");
+
+            int i = 0;
+
+		    while (i++ < 300)
+	        {
+				var res = testServ.Echo("lol42");
+				Console.WriteLine("I: " + i++);
+			}
 
             while (true)
             {
@@ -41,7 +52,7 @@ namespace ClientShared
                     Console.WriteLine("Will not recieve any more messages");
                 }
 
-                Console.WriteLine("Echo res: " + res);
+                Console.WriteLine($"Echo {i++} res: " + res);
 
                 testServ.SendMessage("Send mess: " + line);
             }

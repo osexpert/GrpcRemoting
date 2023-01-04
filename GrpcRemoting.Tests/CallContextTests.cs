@@ -1,5 +1,5 @@
-#if false
 using System.Threading;
+using System.Threading.Tasks;
 using GrpcRemoting.Tests.Tools;
 using Xunit;
 
@@ -8,7 +8,7 @@ namespace GrpcRemoting.Tests
     public class CallContextTests
     {
         [Fact]
-        public void CallContext_should_flow_from_client_to_server_and_back()
+        public async Task CallContext_should_flow_from_client_to_server_and_back()
         {
             var testService = 
                 new TestService
@@ -23,49 +23,38 @@ namespace GrpcRemoting.Tests
             var serverConfig =
                 new ServerConfig()
                 {
-                    NetworkPort = 9093,
-                    RegisterServicesAction = container =>
-                        container.RegisterService<ITestService>(
-                            factoryDelegate: () => testService,
-                            lifetime: ServiceLifetime.Singleton)
+                    //RegisterServicesAction = container =>
+                    //    container.RegisterService<ITestService>(
+                    //        factoryDelegate: () => testService,
+                    //        lifetime: ServiceLifetime.Singleton)
+                    CreateInstance = (t) => testService
                 };
 
-            using var server = new RemotingServer(serverConfig);
+            await using var server = new NativeServer(9093, serverConfig);
+            server.RegisterService<ITestService, TestService>();
             server.Start();
 
             var clientThread =
-                new Thread(() =>
+                new Thread(async () =>
                 {
                     CallContext.SetData("test", "CallContext");
 
-                    var client =
-                        new RemotingClient(new ClientConfig()
-                        {
-                            ServerPort = 9093,
-                            ConnectionTimeout = 0
-                        });
-
-                    client.Connect();
+                    await using var client = new NativeClient(9093, new ClientConfig());
 
                     var localCallContextValueBeforeRpc = CallContext.GetData("test");
                     
                     var proxy = client.CreateProxy<ITestService>();
-                    var result = (string) proxy.TestMethod("x");
+                    var result = (string)proxy.TestMethod("x");
 
                     var localCallContextValueAfterRpc = CallContext.GetData("test");
                     
                     Assert.NotEqual(localCallContextValueBeforeRpc, result);
                     Assert.Equal("Changed", result);
                     Assert.Equal("Changed", localCallContextValueAfterRpc);
-
-                    client.Dispose();
                 });
             
             clientThread.Start();
             clientThread.Join();
-            
-            server.Dispose();
         }
     }
 }
-#endif

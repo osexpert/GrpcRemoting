@@ -30,7 +30,7 @@ namespace ClientNet60
             
             var c = new RemotingClient(channel.CreateCallInvoker(), new ClientConfig { BeforeMethodCall = BeforeBuildMethodCallMessage });
 
-            var testServ = c.CreateServiceProxy<ITestService>();
+            var testServ = c.CreateProxy<ITestService>();
 
             var cs = new ClientTest();
             cs.Test(testServ);

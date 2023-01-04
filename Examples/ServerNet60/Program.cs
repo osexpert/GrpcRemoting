@@ -28,9 +28,11 @@ namespace ServerNet60
 
             var p = new Program();
 
-            RemotingServer.RegisterService(typeof(TestService), typeof(ITestService));
+            
 
             var server = new RemotingServer(new ServerConfig { CreateInstance = p.CreateInstance });
+
+            server.RegisterService<ITestService, TestService>();
 
             var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +42,8 @@ namespace ServerNet60
             {
                 // Small performance benefit to not add catch-all routes to handle UNIMPLEMENTED for unknown services
                 o.IgnoreUnknownServices = true;
+                //o.MaxSendMessageSize
+                //o.MaxReceiveMessageSize
             });
             services.Configure<RouteOptions>(c =>
             {
@@ -47,9 +51,8 @@ namespace ServerNet60
                 c.SuppressCheckForUnhandledSecurityMetadata = true;
             });
 
-            services.AddSingleton<GrpcRemotingService>();// new GrpcRemotingService());
+            services.AddSingleton<GrpcRemotingService>();
             services.TryAddEnumerable(ServiceDescriptor.Singleton(typeof(IServiceMethodProvider<GrpcRemotingService>), new GrpcRemotingMethodProvider(server)));
-            //, () => new GrpcRemotingMethodProvider(server)));
 
             builder.WebHost.ConfigureKestrel(kestrel =>
             {

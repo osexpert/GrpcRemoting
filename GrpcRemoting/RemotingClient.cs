@@ -27,7 +27,7 @@ namespace GrpcRemoting
 
         private static readonly Castle.DynamicProxy.ProxyGenerator ProxyGenerator = new Castle.DynamicProxy.ProxyGenerator();
 
-        public T CreateServiceProxy<T>()
+        public T CreateProxy<T>()
         {
             var serviceProxyType = typeof(ServiceProxy<>).MakeGenericType(typeof(T));
             var serviceProxy = Activator.CreateInstance(serviceProxyType, this /* RemotingClient */);
@@ -51,7 +51,8 @@ namespace GrpcRemoting
                 await call.RequestStream.WriteAsync(req).ConfigureAwait(false);
                 var responseCompleted = call.ResponseStream.ForEachAsync(b => reponse(b, d => call.RequestStream.WriteAsync(d)));
                 await responseCompleted.ConfigureAwait(false);
-            }
+                //await call.RequestStream.CompleteAsync().ConfigureAwait(false);
+			}
         }
 
         internal void Invoke(byte[] req, Func<byte[], Func<byte[], Task>, Task> reponse)
@@ -61,8 +62,9 @@ namespace GrpcRemoting
                 call.RequestStream.WriteAsync(req).GetAwaiter().GetResult();
                 var responseCompleted = call.ResponseStream.ForEachAsync(b => reponse(b, d => call.RequestStream.WriteAsync(d)));
                 responseCompleted.GetAwaiter().GetResult();
-            }
-        }
+                //call.RequestStream.CompleteAsync().GetAwaiter().GetResult();
+			}
+		}
     }
 
     /// <summary>

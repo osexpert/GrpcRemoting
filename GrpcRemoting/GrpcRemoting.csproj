@@ -3,13 +3,19 @@
     <PropertyGroup>
         <LangVersion>9</LangVersion>
         <Title>GrpcRemoting</Title>
-        <AssemblyVersion>0.0.1</AssemblyVersion>
+        <Authors>osexpert, Hagen Siegel</Authors>
+        <Description>GRPC Remoting library for .NET Core and .NET Framework, to aid migration from .NET Remoting</Description>        
+        <Copyright>2022 osexpert, 2022 Hagen Siegel</Copyright>
+<!--        <AssemblyVersion>1.0.1</AssemblyVersion> -->
+        <PackageTags>.NET c# Remoting RPC GRPC Network</PackageTags>
+        <Company>osexpert</Company>
         <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
         <PackageProjectUrl>https://github.com/osexpert/GrpcRemoting</PackageProjectUrl>
         <PackageLicenseUrl></PackageLicenseUrl>
         <RepositoryUrl>https://github.com/osexpert/CoreRemoting.git</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <PackageVersion>0.0.1</PackageVersion>
+<!--        <PackageVersion>1.0.1</PackageVersion> -->
+        <PackageReleaseNotes></PackageReleaseNotes>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -23,14 +29,15 @@
     <ItemGroup>
       <PackageReference Include="Castle.Core" Version="5.1.0" />
       <PackageReference Include="Grpc.Core.Api" Version="2.49.0" />
-      
-      <PackageReference Include="Open.ChannelExtensions" Version="6.2.2" Condition="'$(TargetFramework)' == 'NETSTANDARD2.0'" />
+		<PackageReference Include="Open.ChannelExtensions" Version="6.2.2" Condition="'$(TargetFramework)' == 'NETSTANDARD2.0'" />
+		<!-- <PackageReference Include="Open.ChannelExtensions" Version="6.2.2"  /> -->
       <PackageReference Include="stakx.DynamicProxy.AsyncInterceptor" Version="0.1.0" />
-	  <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
-	  <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
+	    <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
+	    <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
       <PackageReference Include="System.Threading.Channels" Version="6.0.0" />
+		<PackageReference Include="System.Security.Principal.Windows" Version="4.7.0">
+		  <Aliases></Aliases>
+		</PackageReference>
     </ItemGroup>
-    
-
 
 </Project>
