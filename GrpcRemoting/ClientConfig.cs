@@ -13,5 +13,7 @@ namespace GrpcRemoting
         /// Set to be notified before a method call
         /// </summary>
         public Action<Type, MethodInfo> BeforeMethodCall;
-    }
+
+        public bool GrpcDotnetStreamNotClosedWorkaround;
+	}
 }

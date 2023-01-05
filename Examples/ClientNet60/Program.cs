@@ -28,7 +28,11 @@ namespace ClientNet60
 
             var channel = GrpcChannel.ForAddress("http://localhost:5000");
             
-            var c = new RemotingClient(channel.CreateCallInvoker(), new ClientConfig { BeforeMethodCall = BeforeBuildMethodCallMessage });
+            var c = new RemotingClient(channel.CreateCallInvoker(), new ClientConfig 
+            { 
+                BeforeMethodCall = BeforeBuildMethodCallMessage,
+                GrpcDotnetStreamNotClosedWorkaround = true
+            });
 
             var testServ = c.CreateProxy<ITestService>();
 

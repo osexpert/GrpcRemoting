@@ -322,18 +322,25 @@ namespace GrpcRemoting
 
 				bool gotNext = await requestStream.MoveNext().ConfigureAwait(false);
 				if (!gotNext)
-					throw new Exception("no method call request data");
+					throw new Exception("No method call request data");
 
 				await this.RpcCall(serializer, requestStream.Current, async () =>
 				{
 					var gotNext = await requestStream.MoveNext().ConfigureAwait(false);
 					if (!gotNext)
-						throw new Exception("no delegate request data");
+						throw new Exception("No delegate request data");
 					return requestStream.Current;
 				},
 				resp => responseStreamWrapped.WriteAsync(resp).AsTask()).ConfigureAwait(false);
 
 				await responseStreamWrapped.CompleteAsync().ConfigureAwait(false);
+
+				if (_config.GrpcDotnetStreamNotClosedWorkaround)
+				{
+					// tell client to hang up...
+					// hack for grpd-dotnet bug: https://github.com/grpc/grpc-dotnet/issues/2010
+					await responseStream.WriteAsync(new byte[] { }).ConfigureAwait(false);
+				}
 			}
 			catch (Exception e)
 			{

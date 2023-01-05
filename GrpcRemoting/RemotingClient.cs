@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Numerics;
@@ -49,9 +50,21 @@ namespace GrpcRemoting
             using (var call = _callInvoker.AsyncDuplexStreamingCall(GrpcRemoting.Descriptors.RpcCallBinaryFormatter, null, new CallOptions { }))
             {
                 await call.RequestStream.WriteAsync(req).ConfigureAwait(false);
-                var responseCompleted = call.ResponseStream.ForEachAsync(b => reponse(b, d => call.RequestStream.WriteAsync(d)));
-                await responseCompleted.ConfigureAwait(false);
-                //await call.RequestStream.CompleteAsync().ConfigureAwait(false);
+
+				while (await call.ResponseStream.MoveNext().ConfigureAwait(false))
+				{
+                    if (_config.GrpcDotnetStreamNotClosedWorkaround)
+                    {
+                        // client hung up
+                        // hack for grpd-dotnet bug: https://github.com/grpc/grpc-dotnet/issues/2010
+                        if (call.ResponseStream.Current.Length == 0)
+                            break;
+                    }
+
+					await reponse(call.ResponseStream.Current, bytes => call.RequestStream.WriteAsync(bytes));
+				}
+
+                await call.RequestStream.CompleteAsync().ConfigureAwait(false);
 			}
         }
 
@@ -60,13 +73,26 @@ namespace GrpcRemoting
             using (var call = _callInvoker.AsyncDuplexStreamingCall(GrpcRemoting.Descriptors.RpcCallBinaryFormatter, null, new CallOptions { }))
             {
                 call.RequestStream.WriteAsync(req).GetAwaiter().GetResult();
-                var responseCompleted = call.ResponseStream.ForEachAsync(b => reponse(b, d => call.RequestStream.WriteAsync(d)));
-                responseCompleted.GetAwaiter().GetResult();
-                //call.RequestStream.CompleteAsync().GetAwaiter().GetResult();
+
+				while (call.ResponseStream.MoveNext().GetAwaiter().GetResult())
+                {
+                    if (_config.GrpcDotnetStreamNotClosedWorkaround)
+                    {
+                        // client hung up
+                        // hack for grpd-dotnet bug: https://github.com/grpc/grpc-dotnet/issues/2010
+                        if (call.ResponseStream.Current.Length == 0)
+                            break;
+                    }
+
+					reponse(call.ResponseStream.Current, bytes => call.RequestStream.WriteAsync(bytes)).GetAwaiter().GetResult();
+				}
+
+                call.RequestStream.CompleteAsync().GetAwaiter().GetResult();
 			}
 		}
     }
 
+#if false
     /// <summary>
     /// Extension methods that simplify work with gRPC streaming calls.
     /// https://chromium.googlesource.com/external/github.com/grpc/grpc/+/chromium-deps/2016-07-19/src/csharp/Grpc.Core/Utils/AsyncStreamExtensions.cs
@@ -85,4 +111,5 @@ namespace GrpcRemoting
             }
         }
     }
+#endif
 }

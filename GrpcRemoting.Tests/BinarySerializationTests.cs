@@ -1,4 +1,3 @@
-#if false
 using System;
 using GrpcRemoting.RpcMessaging;
 using GrpcRemoting.Serialization.Binary;
@@ -43,26 +42,5 @@ namespace GrpcRemoting.Tests
             Assert.Equal(4711, parameterValues[0]);
         }
 
-        [Fact]
-        public void BinarySerializerAdapter_should_deserialize_CompleteHandshakeWireMessage()
-        {
-            var sessionId = Guid.NewGuid();
-            
-            var completeHandshakeMessage =
-                new WireMessage
-                {
-                    MessageType = "complete_handshake",
-                    Data = sessionId.ToByteArray()
-                };   
-            
-            var serializer = new BinarySerializerAdapter();
-            var rawData = serializer.Serialize(completeHandshakeMessage);
-
-            var deserializedMessage = serializer.Deserialize<WireMessage>(rawData);
-            
-            Assert.Equal("complete_handshake", deserializedMessage.MessageType);
-            Assert.Equal(sessionId, new Guid(deserializedMessage.Data));
-        }
     }
 }
-#endif

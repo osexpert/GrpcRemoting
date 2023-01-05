@@ -34,11 +34,11 @@ namespace ClientShared
 
             int i = 0;
 
-		    while (i++ < 300)
-	        {
-				var res = testServ.Echo("lol42");
-				Console.WriteLine("I: " + i++);
-			}
+//		    while (true)//i++ < 300)
+//	        {
+//				var res = testServ.Echo("lol42");
+//				Console.WriteLine(res + "I: " + i++);
+//			}
 
             while (true)
             {

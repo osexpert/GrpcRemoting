@@ -12,5 +12,6 @@ namespace GrpcRemoting
         /// Set this to overide the default Activator.CreateInstance
         /// </summary>
         public Func<Type, object> CreateInstance;
-    }
+		public bool GrpcDotnetStreamNotClosedWorkaround;
+	}
 }

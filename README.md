@@ -80,4 +80,7 @@ Same problem in NET5 and NET6.
 
 The native Grpc library has none of these problems and is much faster as well. I am not sure if I see a bright future for Kestrel and Grpc, possibly I will be moving to some other tranport.
 
+Bug filed: https://github.com/grpc/grpc-dotnet/issues/2010
+Workaround added: set GrpcDotnetStreamNotClosedWorkaround = true in ClientConfig\ServerConfig
+
 
