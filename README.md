@@ -61,26 +61,6 @@ File read from server and written by client: 13 seconds
 
 There is something fishy here:-)
 
-Other problems with Kestrel:
-
-Get this in log after every method call is returned:
-info: Microsoft.AspNetCore.Server.Kestrel[32]
-      Connection id "{someId}", Request id "{someId}": the application completed without reading the entire request body.
-      
-When calling the server too fast(?), I get this:      
-Unhandled exception. Grpc.Core.RpcException: Status(StatusCode="ResourceExhausted", Detail="Error starting gRPC call. HttpRequestException: An error occurred while sending the request. IOException: The request was aborted. Http2StreamException: The HTTP/2 server reset the stream. HTTP/2 error code 'ENHANCE_YOUR_CALM' (0xb).", DebugException="System.Net.Http.HttpRequestException: An error occurred while sending the request.
- ---> System.IO.IOException: The request was aborted.
- ---> System.Net.Http.Http2StreamException: The HTTP/2 server reset the stream. HTTP/2 error code 'ENHANCE_YOUR_CALM' (0xb).      
- 
-It is reproducable by calling a method in a tight loop, and it will get this exception after ca. 100 calls.
-In the Paralell Stacks viewer in Visual Studio I see:
-1 Process, 200 Async Logical Stack, Scheduled, Http2OutputProducer.ProcessDataWrites()
-
-Same problem in NET5 and NET6.
-
-The native Grpc library has none of these problems and is much faster as well. I am not sure if I see a bright future for Kestrel and Grpc, possibly I will be moving to some other tranport.
-
+When calling the server too fast(?) with grpc-dotnet, I get ENHANCE_YOUR_CALM:
 Bug filed: https://github.com/grpc/grpc-dotnet/issues/2010
-Workaround added: set GrpcDotnetStreamNotClosedWorkaround = true in ClientConfig\ServerConfig
-
-
+Workaround added: use a hangup sequence

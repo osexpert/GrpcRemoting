@@ -6,15 +6,14 @@
         <Authors>osexpert, Hagen Siegel</Authors>
         <Description>GRPC Remoting library for .NET Core and .NET Framework, to aid migration from .NET Remoting</Description>        
         <Copyright>2022 osexpert, 2022 Hagen Siegel</Copyright>
-<!--        <AssemblyVersion>1.0.1</AssemblyVersion> -->
-        <PackageTags>.NET c# Remoting RPC GRPC Network</PackageTags>
+		<VersionPrefix>0.0.1</VersionPrefix>
+		<PackageTags>.NET c# Remoting RPC GRPC Network</PackageTags>
         <Company>osexpert</Company>
         <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
         <PackageProjectUrl>https://github.com/osexpert/GrpcRemoting</PackageProjectUrl>
         <PackageLicenseUrl></PackageLicenseUrl>
         <RepositoryUrl>https://github.com/osexpert/CoreRemoting.git</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-<!--        <PackageVersion>1.0.1</PackageVersion> -->
         <PackageReleaseNotes></PackageReleaseNotes>
     </PropertyGroup>
 
