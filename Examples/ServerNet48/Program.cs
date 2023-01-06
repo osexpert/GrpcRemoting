@@ -25,7 +25,10 @@ namespace ServerNet48
 
         void Go()
         {
-            var remServer = new RemotingServer(new ServerConfig { CreateInstance = CreateInstance });
+            var remServer = new RemotingServer(new ServerConfig 
+            { 
+                CreateInstance = CreateInstance
+            });
             remServer.RegisterService<ITestService, TestService>();
 
             var options = new List<ChannelOption>();

@@ -32,8 +32,7 @@ namespace ServerNet60
 
             var server = new RemotingServer(new ServerConfig
             {
-                CreateInstance = p.CreateInstance,
-                GrpcDotnetStreamNotClosedWorkaround = true
+                CreateInstance = p.CreateInstance
             });
 
             server.RegisterService<ITestService, TestService>();

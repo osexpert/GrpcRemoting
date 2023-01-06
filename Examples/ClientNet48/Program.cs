@@ -24,7 +24,10 @@ namespace ClientNet48
         public void Go()
         {
 			var channel = new Channel("localhost", 5000, ChannelCredentials.Insecure);
-            var c = new RemotingClient(channel.CreateCallInvoker(), new ClientConfig { BeforeMethodCall = BeforeBuildMethodCallMessage });
+            var c = new RemotingClient(channel.CreateCallInvoker(), new ClientConfig 
+            { 
+                BeforeMethodCall = BeforeBuildMethodCallMessage
+            });
             var testServ = c.CreateProxy<ITestService>();
 
             var cs = new ClientTest();

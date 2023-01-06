@@ -335,12 +335,9 @@ namespace GrpcRemoting
 
 				await responseStreamWrapped.CompleteAsync().ConfigureAwait(false);
 
-				if (_config.GrpcDotnetStreamNotClosedWorkaround)
-				{
-					// tell client to hang up...
-					// hack for grpd-dotnet bug: https://github.com/grpc/grpc-dotnet/issues/2010
-					await responseStream.WriteAsync(new byte[] { }).ConfigureAwait(false);
-				}
+				// tell client to hang up...
+				// hack for grpd-dotnet bug(?): https://github.com/grpc/grpc-dotnet/issues/2010
+				await responseStream.WriteAsync(RemotingClient.HangupSequence).ConfigureAwait(false);
 			}
 			catch (Exception e)
 			{

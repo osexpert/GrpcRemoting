@@ -30,8 +30,7 @@ namespace ClientNet60
             
             var c = new RemotingClient(channel.CreateCallInvoker(), new ClientConfig 
             { 
-                BeforeMethodCall = BeforeBuildMethodCallMessage,
-                GrpcDotnetStreamNotClosedWorkaround = true
+                BeforeMethodCall = BeforeBuildMethodCallMessage
             });
 
             var testServ = c.CreateProxy<ITestService>();

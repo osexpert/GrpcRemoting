@@ -347,13 +347,20 @@ namespace GrpcRemoting.Tests
         public interface IGenericEchoService
         {
             T Echo<T>(T value);
-        }
+
+            void a();
+		}
 
         public class GenericEchoService : IGenericEchoService
         {
             public T Echo<T>(T value)
             {
                 return value;
+            }
+
+            public void a()
+            {
+                // test smallest payload
             }
         }
 
@@ -381,6 +388,8 @@ namespace GrpcRemoting.Tests
             var result = proxy.Echo("Yay");
             
             Assert.Equal("Yay", result);
+
+            proxy.a();
         }
         
         #region Service with enum as operation argument
