@@ -1,4 +1,12 @@
-﻿using System;
+﻿/*
+ * Based on code from Microsoft.Bot.Builder
+ * https://github.com/CXuesong/BotBuilder.Standard
+ * branch: netcore20+net45
+ * BotBuilder.Standard/CSharp/Library/Microsoft.Bot.Builder/Fibers/NetStandardSerialization.cs
+ * BotBuilder.Standard/CSharp/Library/Microsoft.Bot.Builder/Fibers/Serialization.cs
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
