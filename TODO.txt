@@ -1,0 +1,24 @@
+Use headers to tell what formatter to use? Serializer: BinaryFormatter, MemoryPack, etc.
+Use headers to tell what\if compression to use? Compress: Deflate, gzip, etc.
+
+Use separate methods for bidir and unary? So if no callback delegate arguments can use unary.
+Why? maybe a bit faster? But not sure.
+
+TODO: try to reproduce mass reset\cancellation hang on client with bidir and dornet client?
+
+grpd-dotnet server hack to close stream on return:
+
+var ctx = context.GetHttpContext();
+var http2stream = ctx.Features.Get<IHttp2StreamIdFeature>();
+http2stream.GetType().GetMethod("OnEndStreamReceived", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance).Invoke(http2stream, null);
+
+PS: only seems to work well for native client.
+dotnet client at some point hang due to a mass reset problem (also it is a huge overhead here that every call end upm as cancelled)
+
+So...it seems not possible to create a grpc dotnet server that is stable with both native and dotnet client...
+Native client and server is always stable. Native server is stable with dotnet client too.
+
+Dotnet client can be made stable with dotnetserver by having server sering a hangup message to the client
+and then client call RequestStream.CompleteAsync() before the server call returns.
+BUT this does not help when using the native client -> dotnet server, in this case the dot net server still fails.
+So native client -> dotnet server seems to be most incompatible and no know hack or workaround here.

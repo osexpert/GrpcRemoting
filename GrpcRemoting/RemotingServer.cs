@@ -14,6 +14,7 @@ using GrpcRemoting.RpcMessaging;
 using GrpcRemoting.Serialization;
 using GrpcRemoting.Serialization.Binary;
 using System.Xml.Linq;
+using System.Net.Http;
 
 namespace GrpcRemoting
 {
@@ -293,7 +294,7 @@ namespace GrpcRemoting
 
         static ISerializerAdapter _binaryFormatter = new BinarySerializerAdapter();
 
-        /// <summary>
+		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="requestStream"></param>
@@ -306,7 +307,7 @@ namespace GrpcRemoting
         }
 
 
-        /// <summary>
+		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="serializer"></param>
@@ -335,9 +336,34 @@ namespace GrpcRemoting
 
 				await responseStreamWrapped.CompleteAsync().ConfigureAwait(false);
 
-				// tell client to hang up...
-				// hack for grpd-dotnet bug(?): https://github.com/grpc/grpc-dotnet/issues/2010
-				await responseStream.WriteAsync(RemotingClient.HangupSequence).ConfigureAwait(false);
+				if (_config.EnableGrpcDotnetServerBidirStreamNotClosedHacks)
+				{
+
+					// tell client to hang up...because its not possible to hangup from the server without leaking http2 streams in grpc-dotnet....
+					// Native grpc works fine, as always.
+					// hack for grpd-dotnet bug(?): https://github.com/grpc/grpc-dotnet/issues/2010
+					var hdrs = context.RequestHeaders;
+					var agent = hdrs.GetValue("user-agent");
+					if (agent != null)
+					{
+						if (agent.StartsWith("grpc-dotnet/"))
+						{
+							// dotnet client needs hangup hack
+							await responseStream.WriteAsync(new[] { RemotingClient.ClientHangupByte }).ConfigureAwait(false);
+						}
+						else if (agent.StartsWith("grpc-csharp/"))
+						{
+							// needs very dirty hack
+							// This hack works with the native client when dotnet server is used
+							//var ctx = context.GetHttpContext();
+							//var http2stream = ctx.Features.Get<IHttp2StreamIdFeature>();
+							//http2stream.GetType().GetMethod("OnEndStreamReceived", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance).Invoke(http2stream, null);
+
+							if (context.UserState.TryGetValue(GrpcDotnetBidirStreamNotClosedHackKey, out var grpcDotnetBidirStreamNotClosedHackAction))
+								((Action<ServerCallContext>)grpcDotnetBidirStreamNotClosedHackAction)?.Invoke(context);
+						}
+					}
+				}
 			}
 			catch (Exception e)
 			{
@@ -345,7 +371,7 @@ namespace GrpcRemoting
 			}
 		}
 
-
+		public static readonly object GrpcDotnetBidirStreamNotClosedHackKey = new();
 	}
 
 	/// <summary>
