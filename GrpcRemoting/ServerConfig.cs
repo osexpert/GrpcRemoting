@@ -1,3 +1,4 @@
+using Grpc.Core;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
@@ -14,5 +15,7 @@ namespace GrpcRemoting
         public Func<Type, object> CreateInstance;
 
 		public bool EnableGrpcDotnetServerBidirStreamNotClosedHacks;
-    }
+        public Action<ServerCallContext> GrpcDotnetServerBidirStreamNotClosedHackAction;
+
+	}
 }

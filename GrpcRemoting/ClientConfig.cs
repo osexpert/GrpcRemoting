@@ -14,6 +14,6 @@ namespace GrpcRemoting
         /// </summary>
         public Action<Type, MethodInfo> BeforeMethodCall;
 
-		public bool EnableGrpcDotnetServerBidirStreamNotClosedHacks;
+		public bool EnableGrpcDotnetServerBidirStreamNotClosedHacks = true;
     }
 }

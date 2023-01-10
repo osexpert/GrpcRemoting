@@ -25,20 +25,6 @@ namespace ServerNet60
         }
 
         Task RpcCallBinaryFormatter(GrpcRemotingService service, IAsyncStreamReader<byte[]> input, IServerStreamWriter<byte[]> output, ServerCallContext serverCallContext)
-            => pServ.RpcCallBinaryFormatter(input, output, AddGrpcDotnetBidirStreamNotClosedHack(serverCallContext));
-
-        static ServerCallContext AddGrpcDotnetBidirStreamNotClosedHack(ServerCallContext serverCallContext)
-        {
-            serverCallContext.UserState.TryAdd(RemotingServer.GrpcDotnetBidirStreamNotClosedHackKey, (Action<ServerCallContext>)Hack);
-            return serverCallContext;
-        }
-
-        static void Hack(ServerCallContext serverCallContext)
-        {
-			var ctx = serverCallContext.GetHttpContext();
-			var http2stream = ctx.Features.Get<IHttp2StreamIdFeature>();
-			var meht = http2stream?.GetType().GetMethod("OnEndStreamReceived", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-			meht?.Invoke(http2stream, null);
-		}
+            => pServ.RpcCallBinaryFormatter(input, output, serverCallContext);
     }
 }

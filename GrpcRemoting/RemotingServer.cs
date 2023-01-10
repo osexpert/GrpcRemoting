@@ -358,9 +358,7 @@ namespace GrpcRemoting
 							//var ctx = context.GetHttpContext();
 							//var http2stream = ctx.Features.Get<IHttp2StreamIdFeature>();
 							//http2stream.GetType().GetMethod("OnEndStreamReceived", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance).Invoke(http2stream, null);
-
-							if (context.UserState.TryGetValue(GrpcDotnetBidirStreamNotClosedHackKey, out var grpcDotnetBidirStreamNotClosedHackAction))
-								((Action<ServerCallContext>)grpcDotnetBidirStreamNotClosedHackAction)?.Invoke(context);
+							_config.GrpcDotnetServerBidirStreamNotClosedHackAction?.Invoke(context);
 						}
 					}
 				}

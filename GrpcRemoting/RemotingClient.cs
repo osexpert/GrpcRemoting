@@ -65,7 +65,7 @@ namespace GrpcRemoting
                         }
                     }
 
-					await reponse(call.ResponseStream.Current, bytes => call.RequestStream.WriteAsync(bytes));
+					await reponse(call.ResponseStream.Current, bytes => call.RequestStream.WriteAsync(bytes)).ConfigureAwait(false);
 				}
 
                 await call.RequestStream.CompleteAsync().ConfigureAwait(false);

@@ -1,9 +1,11 @@
 ﻿using Grpc.AspNetCore.Server.Model;
+using Grpc.Core;
 using GrpcRemoting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.Server.Kestrel.Core.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -32,8 +34,10 @@ namespace ServerNet60
 
             var server = new RemotingServer(new ServerConfig
             {
-                CreateInstance = p.CreateInstance
-            });
+                CreateInstance = p.CreateInstance,
+                EnableGrpcDotnetServerBidirStreamNotClosedHacks = true,
+                GrpcDotnetServerBidirStreamNotClosedHackAction = Hack
+			});
 
             server.RegisterService<ITestService, TestService>();
 
@@ -93,7 +97,15 @@ namespace ServerNet60
             await Task.Delay(-1);
         }
 
-        public object? CreateInstance(Type serviceType)
+		static void Hack(ServerCallContext serverCallContext)
+		{
+			var ctx = serverCallContext.GetHttpContext();
+			var http2stream = ctx.Features.Get<IHttp2StreamIdFeature>();
+			var meht = http2stream?.GetType().GetMethod("OnEndStreamReceived", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+			meht?.Invoke(http2stream, null);
+		}
+
+		public object? CreateInstance(Type serviceType)
         {
             Guid sessID = (Guid)CallContext.GetData("SessionId");
 
