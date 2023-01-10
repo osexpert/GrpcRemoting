@@ -1,5 +1,5 @@
-Use headers to tell what formatter to use? Serializer: BinaryFormatter, MemoryPack, etc.
-Use headers to tell what\if compression to use? Compress: Deflate, gzip, etc.
+Use headers to tell what formatter to use? Serializer\formatter: BinaryFormatter, MemoryPack, etc.
+Use headers to tell what\if compression to use? Compress\compressor: Deflate, gzip, etc.
 
 Use separate methods for bidir and unary? So if no callback delegate arguments can use unary.
 Why? maybe a bit faster? But not sure.
@@ -22,3 +22,11 @@ Dotnet client can be made stable with dotnetserver by having server sering a han
 and then client call RequestStream.CompleteAsync() before the server call returns.
 BUT this does not help when using the native client -> dotnet server, in this case the dot net server still fails.
 So native client -> dotnet server seems to be most incompatible and no know hack or workaround here.
+
+TODO: compression. use headers? (Metadata). Compress if over 1000 bytes? (at least good for json). Deflate
+But grpc has native compression too? Is it enabled by default?
+
+FlagsAttribute subclass: nativeremotingclient, dotnetremotingclient ???
+
+TODO: add possibility to change formatter based on interface method attributes.
+Then can gradually migrate from BinaryFormatter to eg. MemoryPack etc.
